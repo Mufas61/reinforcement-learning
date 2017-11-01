@@ -1,7 +1,4 @@
-package rl_sim.backend.maze;/*
- * Created on Nov 8, 2004
- *
- */
+package rl_sim.backend.maze;
 
 import java.io.Serializable;
 

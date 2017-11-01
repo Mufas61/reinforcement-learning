@@ -1,7 +1,7 @@
 package rl_sim.gui;
 
 /**
- * rl_sim.gui.Utility class having various miscellaneous functions
+ * Utility class having various miscellaneous functions
  */
 
 public class Utility {

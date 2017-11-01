@@ -43,6 +43,8 @@ import java.awt.*;
 
 public class GraphicsUtil {
 
+    public static final String LOOK_AND_FEEL = "javax.swing.plaf.metal.MetalLookAndFeel";
+
     //----------------------------------------------------
 
     /**
@@ -163,8 +165,6 @@ public class GraphicsUtil {
      * java.awt.Graphics.
      *
      * @param g          The Graphics object.
-     * @param x          The left side of the bounding rectangle
-     * @param y          The top of the bounding rectangle
      * @param width      The width of the bounding rectangle
      * @param height     The height of the bounding rectangle
      * @param startAngle The beginning angle

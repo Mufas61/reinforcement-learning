@@ -11,9 +11,9 @@ import java.util.Vector;
 public class Maze implements Serializable {
     //Attributes
     public int height, width; //height and width of the maze
-    public Vector goals;
-    public Vector starts;
-    public Vector walls;
+    public Vector<State> goals;
+    public Vector<State> starts;
+    public Vector<Wall> walls;
 //	private double[][] rewards;
 //	double boundaryPenalty;
 
@@ -21,32 +21,33 @@ public class Maze implements Serializable {
         width = _width;
         height = _height;
 
-        walls = new Vector();
-        goals = new Vector();
-        starts = new Vector();
+        walls = new Vector<>();
+        goals = new Vector<>();
+        starts = new Vector<State>();
 
 //		rewards = new double[width][height];
     }
 
-//	void setBoundaryPenalty(double _penalty) 
+//	void setBoundaryPenalty(double _penalty)
 //	{
 //		boundaryPenalty = _penalty;
 //	}
 
-//	void setDimensions(int _width, int _height) 
+//	void setDimensions(int _width, int _height)
 //	{
 //		height = _height;
 //		width = _width;
 //	}
 
-    /*
+    /**
      * adds a start state to the maze
      */
     void addStart(State st) {
         starts.add(st);
     }
 
-    /* adds the goal state to the maze. if a goal already exists at that position
+    /**
+     * adds the goal state to the maze. if a goal already exists at that position
      * then the goal is removed from that location. this enables goal addition and
      * deletion using the GUI
      */
@@ -60,7 +61,7 @@ public class Maze implements Serializable {
         else goals.remove(st);
     }
 
-    /*
+    /**
      * this is a debugging function used to display the maze status on the console
      */
     void display() {
@@ -76,7 +77,7 @@ public class Maze implements Serializable {
         }
     }
 
-    /*
+    /**
      * determines if the transition from current state to next state is a valid transition
      * a transition is invalid when there is a wall between the current state and next state OR
      * the next state lies outside the maze boundary
@@ -91,11 +92,11 @@ public class Maze implements Serializable {
         return true;
     }
 
-    /*
+    /**
      * returns the direction (UP=0, RIGHT=1, DOWN=2, LEFT=3) in which state 'st' lies with respect
      * to the state 'curr'.
      */
-    public int getDirection(State curr, State st) {
+    private int getDirection(State curr, State st) {
         switch (curr.x - st.x) {
             case -1:
                 return Wall.RIGHT;
@@ -111,11 +112,11 @@ public class Maze implements Serializable {
         return Wall.UP; //returning something by default, exception shud be used here
     }
 
-    /*
+    /**
      * returns all possible valid successors of the state 'currState'
      */
-    Vector getValidSuccessors(State currState) {
-        Vector succs = new Vector();
+    Vector<State> getValidSuccessors(State currState) {
+        Vector<State> succs = new Vector<>();
         for (int i = 0; i < Action.numActions; i++) {
             State newState = Action.performAction(currState, i);
             if (isValidTransition(currState, newState))
@@ -124,12 +125,12 @@ public class Maze implements Serializable {
         return succs;
     }
 
-    /*
+    /**
      * returns all the successors (valid successors as well as invalid successors)
      * of the state 'currState'
      */
-    public Vector getSuccessors(State currState) {
-        Vector succs = new Vector();
+    public Vector<State> getSuccessors(State currState) {
+        Vector<State> succs = new Vector<State>();
 
         for (int i = 0; i < Action.numActions; i++) {
             State newState = Action.performAction(currState, i);
@@ -138,7 +139,7 @@ public class Maze implements Serializable {
         return succs;
     }
 
-    /*
+    /**
      * adds a wall to the maze
      */
     public void addWall(Wall newWall) {
@@ -154,7 +155,7 @@ public class Maze implements Serializable {
         }
     }
 
-    /*
+    /**
      * returns the reward which will result if there is an attempt to make a transition from
      * state 'curr' to state 'st'. returns penalty if the transition is invalid else returns zero
      */
@@ -162,20 +163,20 @@ public class Maze implements Serializable {
         Wall possibleWall = new Wall(curr.x, curr.y, getDirection(curr, st));
         int index = walls.indexOf(possibleWall);
         if (index != -1) {
-            Wall w = (Wall) walls.get(index);
+            Wall w = walls.get(index);
             return w.penalty;
         }
         return 0;
     }
 
-    /*
+    /**
      * returns true if a wall is present at the specified location else returns false.
      */
-    boolean isWallPresent(Wall newWall) {
+    private boolean isWallPresent(Wall newWall) {
         boolean wallPresent = false;
         Wall w = new Wall();
-        for (int i = 0; i < walls.size(); i++) {
-            w = (Wall) walls.get(i);
+        for (Object wall : walls) {
+            w = (Wall) wall;
             if (w.x == newWall.x && w.y == newWall.y && w.dir == newWall.dir) {
                 wallPresent = true;
                 break;
@@ -184,7 +185,8 @@ public class Maze implements Serializable {
         return wallPresent;
     }
 
-    /*only for debugging purposes...
+    /**
+     * only for debugging purposes...
      * prints on the console all the walls that are present in the maze
      */
     public void printWalls() {
@@ -193,15 +195,16 @@ public class Maze implements Serializable {
         if (walls.isEmpty())
             Utility.show("no walls yet");
 
-        for (int i = 0; i < walls.size(); i++) {
-            w = (Wall) walls.get(i);
+        for (Object wall : walls) {
+            w = (Wall) wall;
             Utility.show("wall at " + w.x + " " + w.y + " " + w.dir + " "
                     + w.penalty);
         }
         Utility.show("------------done------------");
     }
 
-    /*only for debugging purposes...
+    /**
+     * only for debugging purposes...
      * prints on the console all the goals that are present in the maze
      */
     public void printGoals() {
@@ -209,8 +212,8 @@ public class Maze implements Serializable {
         Utility.show("-------------------------");
         if (goals.isEmpty())
             Utility.show("no goals yet");
-        for (int i = 0; i < goals.size(); i++) {
-            st = (State) goals.get(i);
+        for (Object goal : goals) {
+            st = (State) goal;
             Utility.show("goal at " + st.x + " " + st.y);
         }
     }

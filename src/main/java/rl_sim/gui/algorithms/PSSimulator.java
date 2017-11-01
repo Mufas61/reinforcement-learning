@@ -21,6 +21,8 @@ import java.text.DecimalFormat;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 
+import static rl_sim.gui.GraphicsUtil.LOOK_AND_FEEL;
+
 public class PSSimulator extends javax.swing.JFrame implements ActionListener {
     private JPanel jPanel;
     private JButton jLoadButton;
@@ -59,7 +61,7 @@ public class PSSimulator extends javax.swing.JFrame implements ActionListener {
     private DecimalFormat df = new DecimalFormat("0.0");
     private JScrollPane jScrollPane;
 
-    private String mazeStatus = "Load rl_sim.gui.Maze First...";
+    private String mazeStatus = "Load Maze First...";
     private String algorithmStatus = "";
     private JCheckBox jAnimateCheckBox;
     private JButton jCycleButton;
@@ -77,7 +79,7 @@ public class PSSimulator extends javax.swing.JFrame implements ActionListener {
     static {
         //Set Look & Feel
         try {
-            javax.swing.UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+            javax.swing.UIManager.setLookAndFeel(LOOK_AND_FEEL);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -299,7 +301,7 @@ public class PSSimulator extends javax.swing.JFrame implements ActionListener {
             {
                 jStatusLabel = new JLabel();
                 jPanel.add(jStatusLabel);
-                jStatusLabel.setText("Load rl_sim.gui.Maze First...");
+                jStatusLabel.setText("Load Maze First...");
                 jStatusLabel.setBounds(182, 14, 770, 34);
                 jStatusLabel.setBackground(new java.awt.Color(192, 192, 192));
                 jStatusLabel.setBorder(BorderFactory.createTitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, new java.awt.Font("MS Sans Serif", 0, 11), new java.awt.Color(0, 0, 0)));
@@ -330,7 +332,7 @@ public class PSSimulator extends javax.swing.JFrame implements ActionListener {
                     ObjectInputStream in = new ObjectInputStream(gzis);
                     myMaze = (Maze) in.readObject();
                     in.close();
-                    mazeStatus = " [ " + myMaze.width + " X " + myMaze.height + " rl_sim.gui.Maze, rl_sim.Wall Penalty:" + ((Wall) myMaze.walls.get(0)).penalty + "] | ";
+                    mazeStatus = " [ " + myMaze.width + " X " + myMaze.height + " Maze, rl_sim.Wall Penalty:" + (myMaze.walls.get(0)).penalty + "] | ";
                     algorithmStatus = " Prioritized Sweeping --> Click Initialize";
 
                     sqSize = (int) Math.min(Math.floor((this.getSize().width - X - 10) / myMaze.width),
@@ -495,7 +497,7 @@ public class PSSimulator extends javax.swing.JFrame implements ActionListener {
         int aX, aY, bX, bY;    //start and end points of the wall
 
         for (int i = 0; i < myMaze.walls.size(); i++) {
-            Wall w = (Wall) myMaze.walls.get(i);
+            Wall w = myMaze.walls.get(i);
             int nodeX = w.x;
             int nodeY = w.y;
             switch (w.dir) {

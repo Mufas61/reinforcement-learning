@@ -23,6 +23,8 @@ import java.text.DecimalFormat;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 
+import static rl_sim.gui.GraphicsUtil.LOOK_AND_FEEL;
+
 public class AlgoSimulator extends javax.swing.JFrame implements ActionListener {
     private JPanel jPanel;
     private JButton jLoadButton;
@@ -38,9 +40,6 @@ public class AlgoSimulator extends javax.swing.JFrame implements ActionListener 
     private JButton jUpdateButton;
     private JButton jRefreshButton;
     private JLabel jStatusLabel;
-    private JTextField jFileNameTextField;
-    private JTextField jCyclesTextField;
-    private JLabel jCyclesLabel;
     private JTextField sqSizeTextField;
     private JTextField pjogTextField;
     private JLabel JLabelPJOG;
@@ -55,7 +54,7 @@ public class AlgoSimulator extends javax.swing.JFrame implements ActionListener 
     private boolean ShowValue = true;
     private boolean ShowPolicy = true;
     private DecimalFormat df = new DecimalFormat("0");
-    private String mazeStatus = "Load rl_sim.gui.Maze First...";
+    private String mazeStatus = "Load Maze First...";
     private String basicAlgStatus = "";
     private String additionalAlgStatus = "";
     private JLabel jLabelVFLimit;
@@ -66,7 +65,7 @@ public class AlgoSimulator extends javax.swing.JFrame implements ActionListener 
     static {
         //Set Look & Feel
         try {
-            javax.swing.UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+            javax.swing.UIManager.setLookAndFeel(LOOK_AND_FEEL);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -274,7 +273,7 @@ public class AlgoSimulator extends javax.swing.JFrame implements ActionListener 
             {
                 jStatusLabel = new JLabel();
                 jPanel.add(jStatusLabel);
-                jStatusLabel.setText("Load rl_sim.gui.Maze First...");
+                jStatusLabel.setText("Load Maze First...");
                 jStatusLabel.setBounds(182, 14, 770, 34);
                 jStatusLabel.setBackground(new java.awt.Color(192, 192, 192));
                 jStatusLabel.setBorder(BorderFactory.createTitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, new java.awt.Font("MS Sans Serif", 0, 11), new java.awt.Color(0, 0, 0)));
@@ -304,7 +303,7 @@ public class AlgoSimulator extends javax.swing.JFrame implements ActionListener 
                     ObjectInputStream in = new ObjectInputStream(gzis);
                     myMaze = (Maze) in.readObject();
                     in.close();
-                    mazeStatus = " [ " + myMaze.width + " X " + myMaze.height + " rl_sim.gui.Maze, rl_sim.Wall Penalty:" + ((Wall) myMaze.walls.get(0)).penalty + "] | ";
+                    mazeStatus = " [ " + myMaze.width + " X " + myMaze.height + " Maze, rl_sim.Wall Penalty:" + (myMaze.walls.get(0)).penalty + "] | ";
 
                     if (algoType == Algorithms.ValueIter)
                         basicAlgStatus = " Value Iteration";
@@ -459,7 +458,7 @@ public class AlgoSimulator extends javax.swing.JFrame implements ActionListener 
         int aX, aY, bX, bY;    //start and end points of the wall
 
         for (int i = 0; i < myMaze.walls.size(); i++) {
-            Wall w = (Wall) myMaze.walls.get(i);
+            Wall w = myMaze.walls.get(i);
             int nodeX = w.x;
             int nodeY = w.y;
             switch (w.dir) {
