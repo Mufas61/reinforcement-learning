@@ -1,5 +1,6 @@
 package rl_sim.gui.maze;
 
+import org.jetbrains.annotations.NotNull;
 import rl_sim.backend.maze.Maze;
 import rl_sim.backend.maze.Wall;
 import rl_sim.gui.GraphicsUtil;
@@ -21,31 +22,49 @@ import static rl_sim.gui.GraphicsUtil.LOOK_AND_FEEL;
 public class MazeEditor extends javax.swing.JFrame implements ActionListener {
 
     /**
+     * Gets incremented for every new element.
+     */
+    private int yPosition = 0;
+
+    /**
      * Path to the maze files.
      */
     private static final String MAZE_DIRECTORY_PATH = "./mazes/";
 
+    private static final int BUTTON_HEIGHT = 25;
+    private static final int MARGIN = 5;
+    private static final int INPUT_BUTTON_POSITION = 65;
+    private static final int TEXT_FIELD_WIDTH = 65;
+    private static final int INPUT_BUTTON_WIDTH = 5 + 85;
+    private static final int BUTTON_WIDTH = 5 + 70 + 80;
+
     /*all the components*/
     private JPanel jPanel;
-    private JButton jHeight, jWidth, jWalls, jSetPenalty, jAddGoals, jSaveMaze, jBoxSize, jResetMaze;
-    private JTextField jHeightTextField, jWidthTextField, jPenaltyTextField, jBoundaryPenaltyTextField, jBoxSizeTextField;
-    private JPanel jGridPanel;
-    private JSeparator jSeparator1;
+    private JButton jHeight = new JButton();
+    private JButton jWidth = new JButton();
+    private JButton jWalls = new JButton();
+    private JButton jPenalty = new JButton();
+    private JButton jBoundaryPenalty = new JButton();
+    private JButton jAddGoals = new JButton();
+    private JButton jSaveMaze = new JButton();
+    private JButton jLoadMaze = new JButton();
+    private JButton jBoxSize = new JButton();
+    private JButton jResetMaze = new JButton();
+    private JTextField jHeightTextField = new JTextField();
+    private JTextField jWidthTextField = new JTextField();
+    private JTextField jPenaltyTextField = new JTextField();
+    private JTextField jBoundaryPenaltyTextField = new JTextField();
 
-    /*all the listeners*/
-    private SymMouse aSymMouse;
-
+    private JTextField jBoxSizeTextField = new JTextField();
     /*other objects and variables*/
     private Maze myMaze;
-    private int penalty = 0;    //the penalty to be set for the walls
-    private int boundaryPenalty = 0; //the penalty to be set for the boundary walls
+    private int penalty;    //the penalty to be set for the walls
+    private int boundaryPenalty; //the penalty to be set for the boundary walls
     private int nodeLength = 40;    //indicates the size of the square box to be displayed in the GUI
     //by default it is 40 pixels. increase to increase magnification factor
     private boolean boundariesAdded = false;
     private int edit_state;
-    public static int EDIT_WALLS = 1, ADD_GOALS = 2, ADD_START = 3, ASSIGN_REWARD = 4;
-    private JButton jLoadMaze;
-
+//    public static int EDIT_WALLS = 1, ADD_GOALS = 2, ADD_START = 3, ASSIGN_REWARD = 4;
 
     static {
         //Set Look & Feel
@@ -56,11 +75,19 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
         }
     }
 
+    /**
+     * Main method.
+     *
+     * @param args arguments.
+     */
     public static void main(String[] args) {
         MazeEditor inst = new MazeEditor();
         inst.setVisible(true);
     }
 
+    /**
+     * Constructor.
+     */
     public MazeEditor() {
         super("RL-MDP:Maze Editor");
         initGUI();
@@ -71,156 +98,88 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
      */
     private void initGUI() {
         try {
-
             myMaze = new Maze(2, 2);
             setSize(600, 600);
             this.setExtendedState(MAXIMIZED_BOTH);
             setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-            aSymMouse = new SymMouse();
+            final SymMouse aSymMouse = new SymMouse();
 
             jPanel = new JPanel();
             this.getContentPane().add(jPanel, BorderLayout.CENTER);
             jPanel.setBackground(new java.awt.Color(235, 241, 238));
             jPanel.setLayout(null);
 
-            initHeightFields();
-            initWidthFields();
-            initPenaltyFields();
-            initWallsButton();
-            initGoalsButton();
-            initSaveButton();
-            initBoxSizeFIelds();
-            initResetButton();
-            initLoadMazeButton();
+            initInputButtonCombination(jHeightTextField, jHeight, "4", "Height");
+            initInputButtonCombination(jWidthTextField, jWidth, "4", "Width");
+            initInputButtonCombination(jPenaltyTextField, jPenalty, "50", "Set Penalty");
+            initInputButtonCombination(jBoundaryPenaltyTextField, jBoundaryPenalty, "50", "Set Boundary Penalty");
+            initButton(jWalls, "Add Walls");
+            initButton(jAddGoals, "Add Goals");
+            initButton(jSaveMaze, "Save Maze");
+            initInputButtonCombination(jBoxSizeTextField, jBoxSize, "30", "Box Size");
+            initButton(jResetMaze, "Reset Maze");
+            initButton(jLoadMaze, "Load Maze");
+            initSeparator();
 
-
-            jSeparator1 = new JSeparator();
-            jPanel.add(jSeparator1);
-            jSeparator1.setBounds(188, 2, 2, 363);
-            jSeparator1.setBorder(BorderFactory.createTitledBorder(
-                    null,
-                    "",
-                    TitledBorder.LEADING,
-                    TitledBorder.TOP,
-                    new java.awt.Font("MS Sans Serif", 0, 11),
-                    new java.awt.Color(0, 0, 0)));
-
-
-            jGridPanel = new GridPanel();
+            final JPanel jGridPanel = new GridPanel();
             jPanel.add(jGridPanel);
             jGridPanel.addMouseListener(aSymMouse);
-
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void initLoadMazeButton() {
-        jLoadMaze = new JButton();
-        jPanel.add(jLoadMaze);
-        jLoadMaze.setText("Load Maze");
-        jLoadMaze.setBounds(5, 30 + 30 + 30 + 30 + 30 + 30 + 30 + 30 + 5, 5 + 70 + 80, 25);
-        jLoadMaze.addActionListener(this);
+    private void initInputButtonCombination(@NotNull final JTextField textField,
+                                            @NotNull final JButton button,
+                                            @NotNull final String defaultValue,
+                                            @NotNull final String name) {
+        jPanel.add(textField);
+        jPanel.add(button);
+
+        textField.setText(defaultValue);
+        textField.setBounds(MARGIN, yPosInPx(this.yPosition) + MARGIN, TEXT_FIELD_WIDTH, BUTTON_HEIGHT);
+
+        button.setText(name);
+        button.setBounds(MARGIN + INPUT_BUTTON_POSITION, yPosInPx(this.yPosition) + MARGIN, INPUT_BUTTON_WIDTH, BUTTON_HEIGHT);
+        button.addActionListener(this);
+        this.yPosition++;
     }
 
-    private void initResetButton() {
-        jResetMaze = new JButton();
-        jPanel.add(jResetMaze);
-        jResetMaze.setText("Reset Maze");
-        jResetMaze.setBounds(5, 30 + 30 + 30 + 30 + 30 + 30 + 30 + 5, 5 + 70 + 80, 25);
-        jResetMaze.addActionListener(this);
+    private void initButton(@NotNull final JButton button,
+                            @NotNull final String name) {
+        jPanel.add(button);
+        button.setText(name);
+        button.setBounds(MARGIN, yPosInPx(this.yPosition) + MARGIN, BUTTON_WIDTH, BUTTON_HEIGHT);
+        button.addActionListener(this);
+        this.yPosition++;
     }
 
-    private void initBoxSizeFIelds() {
-        jBoxSize = new JButton();
-        jPanel.add(jBoxSize);
-        jBoxSize.setText("Box Size");
-        jBoxSize.setBounds(5 + 70, 30 + 30 + 30 + 30 + 30 + 30 + 5, 5 + 80, 25);
-        jBoxSize.addActionListener(this);
-
-
-        jBoxSizeTextField = new JTextField("40");
-        jBoxSizeTextField.setBounds(5, 30 + 30 + 30 + 30 + 30 + 30 + 5, 65, 25);
-        jPanel.add(jBoxSizeTextField);
-    }
-
-    private void initSaveButton() {
-        jSaveMaze = new JButton();
-        jPanel.add(jSaveMaze);
-        jSaveMaze.setText("Save Maze");
-        jSaveMaze.setBounds(5, 30 + 30 + 30 + 30 + 30 + 5, 5 + 70 + 80, 25);
-        jSaveMaze.addActionListener(this);
-    }
-
-    private void initGoalsButton() {
-        jAddGoals = new JButton();
-        jPanel.add(jAddGoals);
-        jAddGoals.setText("Add Goals");
-        jAddGoals.setBounds(5, 30 + 30 + 30 + 30 + 5, 5 + 70 + 80, 25);
-        jAddGoals.addActionListener(this);
-    }
-
-    private void initWallsButton() {
-        jWalls = new JButton();
-        jPanel.add(jWalls);
-        jWalls.setText("Add Walls");
-        jWalls.setBounds(5, 30 + 30 + 30 + 5, 5 + 70 + 80, 25);
-        jWalls.addActionListener(this);
-    }
-
-    private void initPenaltyFields() {
-        jSetPenalty = new JButton();
-        jPanel.add(jSetPenalty);
-        jSetPenalty.setText("Set Penalty");
-        jSetPenalty.setBounds(5 + 65, 30 + 30 + 5, 5 + 85, 25);
-        jSetPenalty.addActionListener(this);
-
-
-        jPenaltyTextField = new JTextField("50");
-        jPenaltyTextField.setBounds(5, 30 + 30 + 5, 30 + 30 + 5, 25);
-        jPanel.add(jPenaltyTextField);
-    }
-
-    private void initWidthFields() {
-        jWidth = new JButton();
-        jPanel.add(jWidth);
-        jWidth.setText("Width");
-        jWidth.setBounds(5 + 65, 30 + 5, 5 + 85, 25);
-        jWidth.addActionListener(this);
-
-
-        jWidthTextField = new JTextField("2");
-        jWidthTextField.setBounds(5, 30 + 5, 65, 25);
-        jPanel.add(jWidthTextField);
-    }
-
-    private void initHeightFields() {
-        jHeight = new JButton();
-        jPanel.add(jHeight);
-        jHeight.setText("Height");
-        jHeight.setBounds(5 + 65, 5, 5 + 85, 25);
-        jHeight.addActionListener(this);
-
-        jHeightTextField = new JTextField("2");
-        jHeightTextField.setBounds(5, 5, 65, 25);
-        jPanel.add(jHeightTextField);
+    /**
+     * Initialize separator.
+     */
+    private void initSeparator() {
+        final JSeparator jSeparator1 = new JSeparator();
+        jPanel.add(jSeparator1);
+        jSeparator1.setBounds(188, 2, 2, 363);
+        jSeparator1.setBorder(BorderFactory.createTitledBorder(
+                null,
+                "",
+                TitledBorder.LEADING,
+                TitledBorder.TOP,
+                new Font("MS Sans Serif", Font.PLAIN, 11),
+                Color.BLACK));
     }
 
     private class GridPanel extends JPanel {
+
         GridPanel() {
             GridLayout jGridPanelLayout = new GridLayout(15, 15);
-            //setBorder(new LineBorder(new java.awt.Color(0,0,0), 1, false));
             jGridPanelLayout.setRows(10);
             jGridPanelLayout.setColumns(10);
             setLayout(jGridPanelLayout);
             setLocation(230, 50);
             setSize(10, 10);
-            //setBounds(230, 50, 800, 800);
-            //setSize(600,600);
-//			setPreferredSize(new Dimension(80,80));
-//			setPreferredSize(600,600);
-            //revalidate();
         }
 
         public void paintComponent(Graphics g) {
@@ -235,12 +194,11 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
 
     class SymMouse extends java.awt.event.MouseAdapter {
         public void mouseClicked(java.awt.event.MouseEvent event) {
-            Object object = event.getSource();
             int clickX = event.getX();
             int clickY = (nodeLength * myMaze.height) - event.getY();
             int nodeX = (clickX / nodeLength);
             int nodeY = (clickY / nodeLength);
-//				System.out.println("nodes= "+nodeX+","+nodeY);
+
             switch (edit_state) {
                 case 1:
                     int lowerLimX = (nodeX * nodeLength) + (int) (0.1 * nodeLength);
@@ -270,7 +228,6 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                     System.out.println("nodeX,nodeY= " + nodeX + "," + nodeY);
                     myMaze.addGoal(new State(nodeX, nodeY));
                     myMaze.printGoals();
-//						System.out.println("number of goals= "+myMaze.goals.size());
                     repaint();
                     break;
                 case 3:
@@ -284,7 +241,7 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent evt) {
-        //System.out.println("event="+ evt);
+        System.out.println("event=" + evt);
         if (evt.getSource() == jLoadMaze) {
             loadFile();
             repaint();
@@ -300,8 +257,10 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                 addBoundaries();
             }
             repaint();
-        } else if (evt.getSource() == jSetPenalty) {
+        } else if (evt.getSource() == jPenalty) {
             penalty = Integer.parseInt(jPenaltyTextField.getText());
+        } else if (evt.getSource() == jBoundaryPenalty) {
+            boundaryPenalty = Integer.parseInt(jBoundaryPenaltyTextField.getText());
         } else if (evt.getSource() == jAddGoals) {
             edit_state = 2;
         } else if (evt.getSource() == jSaveMaze) {
@@ -323,21 +282,20 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
     }
 
     private void plotMaze(Graphics2D g) {
-//		final int nodeLength = 40; //declared as a class variable
-        final int startx = 0;
-        final int starty = 0;
+        final int startX = 0;
+        final int startY = 0;
 
         for (int i = 0; i <= nodeLength * myMaze.width; i = i + nodeLength)
-            g.drawLine(i + startx, starty, i + startx, starty + (nodeLength * myMaze.height));
+            g.drawLine(i + startX, startY, i + startX, startY + (nodeLength * myMaze.height));
 
         for (int i = 0; i <= nodeLength * myMaze.height; i = i + nodeLength)
-            g.drawLine(startx, i + starty, startx + (nodeLength * myMaze.width), i + starty);
+            g.drawLine(startX, i + startY, startX + (nodeLength * myMaze.width), i + startY);
     }
 
     private void drawWalls(Graphics g) {
         int aX, aY, bX, bY;    //start and end points of the wall
         Vector<Wall> wall = new Vector<>(myMaze.walls);
-        Wall w = new Wall();
+        Wall w;
         myMaze.printWalls();
         for (int i = 0; i < myMaze.walls.size(); i++) {
             w = wall.get(i);
@@ -349,7 +307,7 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                     bX = (nodeX + 1) * nodeLength;
                     aY = (myMaze.height - nodeY - 1) * nodeLength;
                     bY = (myMaze.height - nodeY - 1) * nodeLength;
-//					System.out.println("up wall ax,ay,bx,by= "+aX+","+aY+","+bX+","+bY);
+                    System.out.println("up wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
                     GraphicsUtil.drawLine(g, aX, aY, bX, bY, 5);
                     break;
                 case Wall.DOWN:
@@ -357,7 +315,7 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                     bX = (nodeX + 1) * nodeLength;
                     aY = (myMaze.height - nodeY) * nodeLength;
                     bY = (myMaze.height - nodeY) * nodeLength;
-//					System.out.println("down wall ax,ay,bx,by= "+aX+","+aY+","+bX+","+bY);
+                    System.out.println("down wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
                     GraphicsUtil.drawLine(g, aX, aY, bX, bY, 5);
                     break;
                 case Wall.RIGHT:
@@ -365,7 +323,7 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                     bX = (nodeX + 1) * nodeLength;
                     aY = (myMaze.height - nodeY - 1) * nodeLength;
                     bY = (myMaze.height - nodeY) * nodeLength;
-//					System.out.println("right wall ax,ay,bx,by= "+aX+","+aY+","+bX+","+bY);
+                    System.out.println("right wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
                     GraphicsUtil.drawLine(g, aX, aY, bX, bY, 5);
                     break;
                 case Wall.LEFT:
@@ -373,7 +331,7 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                     bX = (nodeX) * nodeLength;
                     aY = (myMaze.height - nodeY) * nodeLength;
                     bY = (myMaze.height - nodeY - 1) * nodeLength;
-//					System.out.println("left wall ax,ay,bx,by= "+aX+","+aY+","+bX+","+bY);
+                    System.out.println("left wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
                     GraphicsUtil.drawLine(g, aX, aY, bX, bY, 5);
                     break;
             }
@@ -383,15 +341,15 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
     private void drawGoals(Graphics g) {
         int left, top, height, width;
         State curr;
-//		System.out.println("size of goal vector= "+myMaze.goals.size());
+        System.out.println("size of goal vector= " + myMaze.goals.size());
         for (int i = 0; i < myMaze.goals.size(); i++) {
             curr = (myMaze.goals.get(i));
             left = curr.x * nodeLength;
             top = (myMaze.height - curr.y - 1) * nodeLength;
             width = nodeLength;
             height = nodeLength;
-//			System.out.println("drawing at "+left+","+top+","+width+","+height);
-            GraphicsUtil.fillRect(g, left, top, width, height, new Color(252, 139, 37));
+            System.out.println("drawing at " + left + "," + top + "," + width + "," + height);
+            GraphicsUtil.fillRect(g, left, top, width, height, Color.ORANGE);
         }
     }
 
@@ -405,8 +363,8 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
             try {
                 File file = fc.getSelectedFile();
                 FileInputStream fis = new FileInputStream(file);
-                GZIPInputStream gzis = new GZIPInputStream(fis);
-                ObjectInputStream in = new ObjectInputStream(gzis);
+                GZIPInputStream gzip = new GZIPInputStream(fis);
+                ObjectInputStream in = new ObjectInputStream(gzip);
                 myMaze = (Maze) in.readObject();
                 in.close();
             } catch (Exception e) {
@@ -425,8 +383,8 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
             try {
                 File file = fc.getSelectedFile();
                 FileOutputStream fos = new FileOutputStream(file);
-                GZIPOutputStream gzos = new GZIPOutputStream(fos);
-                ObjectOutputStream out = new ObjectOutputStream(gzos);
+                GZIPOutputStream gzip = new GZIPOutputStream(fos);
+                ObjectOutputStream out = new ObjectOutputStream(gzip);
                 out.writeObject(myMaze);
                 out.flush();
                 out.close();
@@ -442,7 +400,6 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
     private void addBoundaries() {
         boundariesAdded = true;
         int j = 0;
-        boundaryPenalty = penalty;
         for (int i = 0; i < myMaze.width; i++) {
             System.out.println("adding up walls");
             myMaze.addWall(new Wall(i, j, Wall.DOWN, boundaryPenalty));
@@ -462,5 +419,9 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
             System.out.println("adding right walls");
             myMaze.addWall(new Wall(i, j, Wall.RIGHT, boundaryPenalty));
         }
+    }
+
+    private int yPosInPx(int value) {
+        return value * 30;
     }
 }

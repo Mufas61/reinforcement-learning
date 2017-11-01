@@ -2,7 +2,6 @@ package rl_sim.gui;
 
 import rl_sim.backend.algorithms.Algorithms;
 import rl_sim.gui.algorithms.AlgoSimulator;
-import rl_sim.gui.algorithms.PSSimulator;
 import rl_sim.gui.algorithms.QLSimulator;
 import rl_sim.gui.maze.MazeEditor;
 
@@ -51,7 +50,6 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
                     initValueIterButtin(jPanel);
                     initPolicySimButton(jPanel);
                     initQLSimButton(jPanel);
-                    initPSSimButton(jPanel);
                     initMazeEditorButton(jPanel);
                     initQuitButton(jPanel);
 
@@ -92,15 +90,6 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
         jMazeEditorButton.setBounds(267, 32, 175, 30);
         jMazeEditorButton.setActionCommand("Edit Maze");
         jMazeEditorButton.addActionListener(this);
-    }
-
-    private void initPSSimButton(JPanel jPanel) {
-        JButton jPSSimButton = new JButton();
-        jPanel.add(jPSSimButton);
-        jPSSimButton.setText("P. Sweeping");
-        jPSSimButton.setBounds(368, 134, 160, 30);
-        jPSSimButton.setActionCommand("PSSim");
-        jPSSimButton.addActionListener(this);
     }
 
     private void initQLSimButton(JPanel jPanel) {
@@ -144,9 +133,6 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
             inst.setVisible(true);
         } else if (evt.getActionCommand().equals("QSim")) {
             QLSimulator inst = new QLSimulator();
-            inst.setVisible(true);
-        } else if (evt.getActionCommand().equals("PSSim")) {
-            PSSimulator inst = new PSSimulator();
             inst.setVisible(true);
         }
     }

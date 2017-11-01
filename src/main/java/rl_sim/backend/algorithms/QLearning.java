@@ -230,10 +230,7 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
     }
 
     private boolean reachedGoal(State s) {
-        if (myMaze.goals.contains(s))
-            return true;
-        else
-            return false;
+        return myMaze.goals.contains(s);
     }
 
     public int[][] getOptPolicy() {
