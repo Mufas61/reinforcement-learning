@@ -1,6 +1,6 @@
 package rl_sim;
 
-import rl_sim.gui.MainUI;
+import rl_sim.gui.menu.MainUI;
 
 public class Application {
 

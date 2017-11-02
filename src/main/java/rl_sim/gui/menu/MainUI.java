@@ -1,4 +1,4 @@
-package rl_sim.gui;
+package rl_sim.gui.menu;
 
 import rl_sim.backend.algorithms.Algorithms;
 import rl_sim.gui.algorithms.AlgoSimulator;
@@ -79,7 +79,7 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
         jPanel.add(jQuitButton);
         jQuitButton.setText("Enough of it !!");
         jQuitButton.setBounds(267, 182, 175, 30);
-        jQuitButton.setActionCommand("Quit");
+        jQuitButton.setActionCommand(GUICommand.QUIT.getValue());
         jQuitButton.addActionListener(this);
     }
 
@@ -88,7 +88,7 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
         jPanel.add(jMazeEditorButton);
         jMazeEditorButton.setText("Create Maze");
         jMazeEditorButton.setBounds(267, 32, 175, 30);
-        jMazeEditorButton.setActionCommand("Edit Maze");
+        jMazeEditorButton.setActionCommand(GUICommand.EDIT_MAZE.getValue());
         jMazeEditorButton.addActionListener(this);
     }
 
@@ -97,7 +97,7 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
         jPanel.add(jQLSimButton);
         jQLSimButton.setText("Q Learning");
         jQLSimButton.setBounds(180, 134, 160, 30);
-        jQLSimButton.setActionCommand("QSim");
+        jQLSimButton.setActionCommand(GUICommand.Q_LEARNING_SIM.getValue());
         jQLSimButton.addActionListener(this);
     }
 
@@ -106,7 +106,7 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
         jPanel.add(jPolicySimButton);
         jPolicySimButton.setText("Policy Iteration");
         jPolicySimButton.setBounds(368, 79, 160, 30);
-        jPolicySimButton.setActionCommand("Policy");
+        jPolicySimButton.setActionCommand(GUICommand.POLICY_ITERATION.getValue());
         jPolicySimButton.addActionListener(this);
     }
 
@@ -114,24 +114,24 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
         JButton jValueSimButton = new JButton();
         jPanel.add(jValueSimButton);
         jValueSimButton.setText("Value Iteration");
-        jValueSimButton.setActionCommand("Value");
+        jValueSimButton.setActionCommand(GUICommand.VALUE_ITERATION.getValue());
         jValueSimButton.setBounds(180, 80, 160, 30);
         jValueSimButton.addActionListener(this);
     }
 
     public void actionPerformed(ActionEvent evt) {
-        if (evt.getActionCommand().equals("Quit")) {
+        if (evt.getActionCommand().equals(GUICommand.QUIT.getValue())) {
             System.exit(0);
-        } else if (evt.getActionCommand().equals("Edit Maze")) {
+        } else if (evt.getActionCommand().equals(GUICommand.EDIT_MAZE.getValue())) {
             MazeEditor inst = new MazeEditor();
             inst.setVisible(true);
-        } else if (evt.getActionCommand().equals("Value")) {
+        } else if (evt.getActionCommand().equals(GUICommand.VALUE_ITERATION.getValue())) {
             AlgoSimulator inst = new AlgoSimulator(Algorithms.ValueIter);
             inst.setVisible(true);
-        } else if (evt.getActionCommand().equals("Policy")) {
+        } else if (evt.getActionCommand().equals(GUICommand.POLICY_ITERATION.getValue())) {
             AlgoSimulator inst = new AlgoSimulator(Algorithms.PolicyIter);
             inst.setVisible(true);
-        } else if (evt.getActionCommand().equals("QSim")) {
+        } else if (evt.getActionCommand().equals(GUICommand.Q_LEARNING_SIM.getValue())) {
             QLSimulator inst = new QLSimulator();
             inst.setVisible(true);
         }
