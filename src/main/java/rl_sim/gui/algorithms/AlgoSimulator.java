@@ -1,15 +1,15 @@
 package rl_sim.gui.algorithms;
 
+import rl_sim.backend.Action;
+import rl_sim.backend.State;
 import rl_sim.backend.algorithms.Algorithms;
 import rl_sim.backend.algorithms.PolicyIteration;
 import rl_sim.backend.algorithms.ValueFunction;
 import rl_sim.backend.algorithms.ValueIteration;
-import rl_sim.backend.maze.Maze;
-import rl_sim.backend.maze.Wall;
-import rl_sim.gui.Action;
+import rl_sim.backend.environment.Maze;
+import rl_sim.backend.environment.Wall;
 import rl_sim.gui.GraphicsUtil;
 import rl_sim.gui.Utility;
-import rl_sim.gui.state.State;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -528,17 +528,17 @@ public class AlgoSimulator extends javax.swing.JFrame implements ActionListener 
                     int y1 = yval * sqSize + sqSize / 2;
                     int x2 = x1;
                     int y2 = y1;
-                    switch (policy[xval][y]) {
-                        case Action.UP:
+                    switch (Action.valueOf(policy[xval][y])) {
+                        case UP:
                             y2 = yval * sqSize;
                             break;
-                        case Action.LEFT:
+                        case LEFT:
                             x2 = xval * sqSize;
                             break;
-                        case Action.DOWN:
+                        case DOWN:
                             y2 = yval * sqSize + sqSize;
                             break;
-                        case Action.RIGHT:
+                        case RIGHT:
                             x2 = xval * sqSize + sqSize;
                             break;
                         default:

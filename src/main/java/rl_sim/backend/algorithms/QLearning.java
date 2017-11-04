@@ -1,19 +1,33 @@
 package rl_sim.backend.algorithms;
 
-import rl_sim.backend.maze.Maze;
-import rl_sim.gui.Action;
+import org.jetbrains.annotations.NotNull;
+import rl_sim.backend.Action;
+import rl_sim.backend.ActionHandler;
+import rl_sim.backend.State;
+import rl_sim.backend.environment.Maze;
 import rl_sim.gui.Utility;
-import rl_sim.gui.state.State;
 
-import java.util.Random;
 import java.util.Vector;
 
-public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
+public class QLearning {
+
+    private static final int PATH_COST = 1;
 
     private double maxLearningRate, pjog, epsilon;
-    private final int pathCost = 1;
-    private Maze myMaze;
+
+    /**
+     * Environment
+     */
+    private Maze environment;
+
+    /**
+     * Policy for the field (x,y).
+     */
     private int[][] policy;
+
+    /**
+     * Q(s,a) - Q-value for state and action.
+     */
     private double[][][] qsa;
     private boolean decayingLR;
 
@@ -33,8 +47,6 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
     private double PRECISION = 0.01;
 
 
-    //rl_sim.gui.QLSimulator ui;
-
     public static class Properties {
         public static int PJOG = 1;
         public static int LearningRate = 2;
@@ -42,37 +54,44 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
         public static int DecayingLR = 4;
     }
 
-    public QLearning(Maze _maze, double _pjog, double _lr, double _epsilon, boolean _decayingLR) {
-        myMaze = _maze;
-        pjog = _pjog;
-        maxLearningRate = _lr;
-        epsilon = _epsilon;
-        decayingLR = _decayingLR;
+    /**
+     * Constructor.
+     *
+     * @param maze         Not null.
+     * @param pjog         Percentage that the environment pushes you to another state.
+     * @param learningRate Learning Rate.
+     * @param epsilon      Exploration.
+     * @param decayingLR
+     */
+    public QLearning(@NotNull Maze maze, double pjog, double learningRate, double epsilon, boolean decayingLR) {
+        this.environment = maze;
+        this.pjog = pjog;
+        this.maxLearningRate = learningRate;
+        this.epsilon = epsilon;
+        this.decayingLR = decayingLR;
 
-        start = new State(0, 0);
-        currState = new State(0, 0);
+        this.start = new State(0, 0);
+        this.currState = new State(0, 0);
 
-        currValues = new ValueFunction(myMaze.width, myMaze.height);
-        policy = new int[myMaze.width][myMaze.height];
-        qsa = new double[myMaze.width][myMaze.height][Action.numActions];
+        this.currValues = new ValueFunction(environment.width, environment.height);
+        this.policy = new int[environment.width][environment.height];
+        this.qsa = new double[environment.width][environment.height][Action.capabilities()];
         initialize();
 
-        evaluatedVals = new ValueFunction(myMaze.width, myMaze.height);
-        optVals = new ValueFunction(myMaze.width, myMaze.height);
+        evaluatedVals = new ValueFunction(environment.width, environment.height);
+        optVals = new ValueFunction(environment.width, environment.height);
     }
 
-    public void initialize() {
+    private void initialize() {
         learningRate = maxLearningRate;
         currState.copy(start);
         numEpisodes = 0;
-        //Initialise the qsa array with random numbers
+        //Initialise the qsa array with 0
         currValues.initialize();
-        Random rand = new Random();
         for (int i = 0; i < qsa.length; i++)
             for (int j = 0; j < qsa[i].length; j++)
                 for (int k = 0; k < qsa[i][j].length; k++)
                     qsa[i][j][k] = 0;
-
 
         //Initialise policy for all states as -1
         for (int i = 0; i < policy.length; i++)
@@ -118,16 +137,16 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
         double currStateQ = qsa[currState.x][currState.y][currAction];
 
         //Perform choosen action based on pjog (noise of environment)
-        nextState = Action.performAction(currState, currAction, pjog);
+        nextState = ActionHandler.performAction(currState, Action.valueOf(currAction), pjog);
         //rl_sim.gui.Utility.show(" next st="+nextState.x+","+nextState.y);
 
         //If not a valid transition stay in same state and add penalty;
-        if (!myMaze.isValidTransition(currState, nextState)) {
-            transitionCost = myMaze.getReward(currState, nextState);//add reward or penalty
+        if (!environment.isValidTransition(currState, nextState)) {
+            transitionCost = environment.getReward(currState, nextState);//add reward or penalty
             receivedPenalty = true;
             nextState.copy(currState);
         } else { //transition cost = pathCost
-            transitionCost = pathCost;
+            transitionCost = PATH_COST;
             receivedPenalty = false;
         }
 
@@ -144,27 +163,13 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
         //System.out.println("policy= "+policy[currState.x][currState.y]);
         currState.copy(nextState);
 
-        if (reachedGoal(currState)) {
-            //System.out.println("Goal Reached");
-            //System.out.println("=============================");
-            //rl_sim.gui.Utility.delay(2000);
-            //currState.equals(start);
-        }
-
         return false;
-    }
-
-    public void execute(int numIterations) {
-        currState.copy(start);
-        while (!reachedGoal(currState)) {
-            step();
-        }
     }
 
     public ValueFunction getValueFunction() {
 
-        for (int i = 0; i < myMaze.width; i++)
-            for (int j = 0; j < myMaze.height; j++)
+        for (int i = 0; i < environment.width; i++)
+            for (int j = 0; j < environment.height; j++)
                 currValues.stateValue[i][j] = getMinQsa(new State(i, j));
 
         return currValues;
@@ -183,15 +188,17 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
     }
 
 
-    //returns the best action with probability (1-pjog)
-    //returns other actions with prob. (1-pjog)/numOfActions
+    /**
+     * returns the best action with probability (1-pjog)
+     * returns other actions with prob. (1-pjog)/numOfActions
+     */
     private int chooseAction(State currState, double randNum) {
 
         int bestAction = getBestAction(qsa[currState.x][currState.y]);
-        double d = epsilon / (Action.numActions);
+        double d = epsilon / (Action.capabilities());
         int choosenAction = bestAction;
 
-        for (int i = 0; i < Action.numActions; i++) {
+        for (int i = 0; i < Action.capabilities(); i++) {
             if (randNum < (i + 1) * d) {
                 choosenAction = i;
                 break;
@@ -230,7 +237,7 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
     }
 
     private boolean reachedGoal(State s) {
-        return myMaze.goals.contains(s);
+        return environment.goals.contains(s);
     }
 
     public int[][] getOptPolicy() {
@@ -247,7 +254,7 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
 
     private void calcTrueValues() {
 //		System.out.println("calc'ing opt values");
-        ValueIteration valitr = new ValueIteration(myMaze, pjog, 0.01);
+        ValueIteration valitr = new ValueIteration(environment, pjog, 0.01);
         while (!valitr.step()) ;
         optVals = valitr.getValueFunction();
         optPolicy = valitr.getPolicy();
@@ -265,8 +272,8 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
 
     public double evalPolicy() {
         evaluatedVals.initialize();
-        ValueFunction evalVals = new ValueFunction(myMaze.width, myMaze.height);
-        ValueFunction prevEvalVals = new ValueFunction(myMaze.width, myMaze.height);
+        ValueFunction evalVals = new ValueFunction(environment.width, environment.height);
+        ValueFunction prevEvalVals = new ValueFunction(environment.width, environment.height);
         prevEvalVals.initialize();
 
         State currState, desiredNextState;
@@ -278,34 +285,34 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
             evalVals.initialize();
             maxDelta = 0;
             maxV = 0;
-            for (int i = 0; i < myMaze.width; i++) {
-                for (int j = 0; j < myMaze.height; j++) {
+            for (int i = 0; i < environment.width; i++) {
+                for (int j = 0; j < environment.height; j++) {
                     v = 0;
                     currState = new State(i, j);
-                    if (myMaze.goals.contains(currState)) {
+                    if (environment.goals.contains(currState)) {
                         evalVals.stateValue[i][j] = 0;
                         continue;
                     }
-                    Vector allNext = new Vector(myMaze.getSuccessors(currState));    //vector of successor states
+                    Vector allNext = new Vector(environment.getSuccessors(currState));    //vector of successor states
                     if (-1 == policy[i][j]) {
                         evalVals.stateValue[i][j] = 0;
                         continue;
                     }
 
-                    desiredNextState = Action.performAction(currState, policy[i][j]);
+                    desiredNextState = ActionHandler.performAction(currState, Action.valueOf(policy[i][j]));
 
                     for (Object anAllNext : allNext) {
                         State s = (State) anAllNext;
 
                         if (!desiredNextState.equals(s))
-                            prob = pjog / (Action.numActions - 1);
+                            prob = pjog / (Action.capabilities() - 1);
                         else
                             prob = 1 - pjog;
 
-                        if (myMaze.isValidTransition(currState, s))
+                        if (environment.isValidTransition(currState, s))
                             safe = prevEvalVals.stateValue[s.x][s.y];
                         else
-                            safe = myMaze.getReward(currState, s) + prevEvalVals.stateValue[i][j];
+                            safe = environment.getReward(currState, s) + prevEvalVals.stateValue[i][j];
 
                         v += prob * safe;
                     }
@@ -327,13 +334,11 @@ public class QLearning {//implements rl_sim.backend.algorithms.Algorithms
             if (maxV > MAX_VALUE_ALLOWED)
                 valueConverged = true;
 
-            for (int i = 0; i < myMaze.width; i++)
-                for (int j = 0; j < myMaze.height; j++)
-                    prevEvalVals.stateValue[i][j] = evalVals.stateValue[i][j];
+            for (int i = 0; i < environment.width; i++)
+                System.arraycopy(evalVals.stateValue[i], 0, prevEvalVals.stateValue[i], 0, environment.height);
         }
-        for (int i = 0; i < myMaze.width; i++)
-            for (int j = 0; j < myMaze.height; j++)
-                evaluatedVals.stateValue[i][j] = evalVals.stateValue[i][j];
+        for (int i = 0; i < environment.width; i++)
+            System.arraycopy(evalVals.stateValue[i], 0, evaluatedVals.stateValue[i], 0, environment.height);
         return computeScore();
     }
 

@@ -5,7 +5,7 @@ package rl_sim.gui;
  */
 
 public class Utility {
-    private static boolean DEBUG = false;
+    private static boolean DEBUG = true;
 
     public static double dec3(double a) {
         a = a * 100;

@@ -1,9 +1,10 @@
 package rl_sim.backend.algorithms;
 
-import rl_sim.backend.maze.Maze;
-import rl_sim.gui.Action;
+import rl_sim.backend.Action;
+import rl_sim.backend.ActionHandler;
+import rl_sim.backend.State;
+import rl_sim.backend.environment.Maze;
 import rl_sim.gui.Utility;
-import rl_sim.gui.state.State;
 
 import java.util.Date;
 import java.util.Vector;
@@ -46,7 +47,7 @@ public class ValueIteration implements Algorithms {
 
         for (int i = 0; i < myMaze.width; i++)
             for (int j = 0; j < myMaze.height; j++)
-                policy[i][j] = Action.UP;
+                policy[i][j] = Action.UP.getValue();
     }
 
     public void setProperty(int name, String value) {
@@ -104,15 +105,15 @@ public class ValueIteration implements Algorithms {
 
                 Vector allNext = new Vector(myMaze.getSuccessors(currState));    //vector of states
 
-                for (int a = 0; a < Action.numActions; a++) {
-                    desiredNextState = Action.performAction(currState, a);
+                for (int a = 0; a < Action.capabilities(); a++) {
+                    desiredNextState = ActionHandler.performAction(currState, Action.valueOf(a));
                     value = 0;
                     for (int m = 0; m < allNext.size(); m++) {
                         State s = (State) allNext.get(m);
                         //rl_sim.gui.Utility.show(s.x+","+s.y+" "+"->"+myMaze.getReward(s.x,s.y));
 
                         if (!desiredNextState.equals(s))
-                            prob = pjog / (Action.numActions - 1);
+                            prob = pjog / (Action.capabilities() - 1);
                         else
                             prob = 1 - pjog;
 
@@ -167,17 +168,17 @@ public class ValueIteration implements Algorithms {
         for (int i = myMaze.height - 1; i >= 0; i--) {
             for (int j = 0; j < myMaze.width; j++) {
                 System.out.print((int) Utility.dec3(val[j][i]) + " ");
-                switch (policy[j][i]) {
-                    case Action.UP:
+                switch (Action.valueOf(policy[j][i])) {
+                    case UP:
                         System.out.print("^");
                         break;
-                    case Action.DOWN:
+                    case DOWN:
                         System.out.print("v");
                         break;
-                    case Action.LEFT:
+                    case LEFT:
                         System.out.print("<");
                         break;
-                    case Action.RIGHT:
+                    case RIGHT:
                         System.out.print(">");
                         break;
                 }
@@ -193,8 +194,8 @@ public class ValueIteration implements Algorithms {
      */
     void printNextStates(Vector next) {
         State s = new State(0, 0);
-        for (int i = 0; i < next.size(); i++) {
-            s = (State) next.get(i);
+        for (Object aNext : next) {
+            s = (State) aNext;
             System.out.print(s.x + "," + s.y + " ");
         }
     }

@@ -1,8 +1,9 @@
 package rl_sim.backend.algorithms;
 
-import rl_sim.backend.maze.Maze;
-import rl_sim.gui.Action;
-import rl_sim.gui.state.State;
+import rl_sim.backend.Action;
+import rl_sim.backend.ActionHandler;
+import rl_sim.backend.State;
+import rl_sim.backend.environment.Maze;
 
 import java.util.Date;
 import java.util.Vector;
@@ -53,7 +54,7 @@ public class PolicyIteration implements Algorithms {
 
         for (int i = 0; i < myMaze.width; i++)
             for (int j = 0; j < myMaze.height; j++)
-                currPolicy[i][j] = Action.UP;
+                currPolicy[i][j] = Action.UP.getValue();
     }
 
     public void setProperty(int name, String value) {
@@ -109,7 +110,7 @@ public class PolicyIteration implements Algorithms {
         }
 
 		/*
-		 * This for loop calculates the value of each state based on the policy
+         * This for loop calculates the value of each state based on the policy
 		 * so based on current policy -> currValues is updated
 		 */
 
@@ -130,13 +131,13 @@ public class PolicyIteration implements Algorithms {
                         continue;
                     }
                     Vector allNext = new Vector(myMaze.getSuccessors(currState));    //vector of successor states
-                    desiredNextState = Action.performAction(currState, currPolicy[i][j]);
+                    desiredNextState = ActionHandler.performAction(currState, Action.valueOf(currPolicy[i][j]));
 
                     for (Object anAllNext : allNext) {
                         State s = (State) anAllNext;
 
                         if (!desiredNextState.equals(s))
-                            prob = pjog / (Action.numActions - 1);
+                            prob = pjog / (Action.capabilities() - 1);
                         else
                             prob = 1 - pjog;
 
@@ -191,8 +192,8 @@ public class PolicyIteration implements Algorithms {
                 }
 
                 minV = Double.MAX_VALUE;
-                for (int a = 0; a < Action.numActions; a++) {
-                    State nextState = Action.performAction(currState, a);
+                for (int a = 0; a < Action.capabilities(); a++) {
+                    State nextState = ActionHandler.performAction(currState, Action.valueOf(a));
                     if (!myMaze.isValidTransition(currState, nextState))
                         continue;
 

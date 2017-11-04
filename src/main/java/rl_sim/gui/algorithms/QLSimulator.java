@@ -1,13 +1,13 @@
 package rl_sim.gui.algorithms;
 
+import rl_sim.backend.Action;
+import rl_sim.backend.State;
 import rl_sim.backend.algorithms.QLearning;
 import rl_sim.backend.algorithms.ValueFunction;
-import rl_sim.backend.maze.Maze;
-import rl_sim.backend.maze.Wall;
-import rl_sim.gui.Action;
+import rl_sim.backend.environment.Maze;
+import rl_sim.backend.environment.Wall;
 import rl_sim.gui.GraphicsUtil;
 import rl_sim.gui.Utility;
-import rl_sim.gui.state.State;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -558,20 +558,20 @@ public class QLSimulator extends javax.swing.JFrame implements ActionListener {
             for (int j = 0; j < p[i].length; j++) {
                 x1 = (i * sqSize) + (sqSize / 2);
                 y1 = ((myMaze.height - 1 - j) * sqSize) + (sqSize / 2);
-                switch (p[i][j]) {
-                    case Action.UP:
+                switch (Action.valueOf(p[i][j])) {
+                    case UP:
                         x2 = x1;
                         y2 = ((myMaze.height - 1 - j)) * sqSize;
                         break;
-                    case Action.LEFT:
+                    case LEFT:
                         x2 = i * sqSize;
                         y2 = y1;
                         break;
-                    case Action.DOWN:
+                    case DOWN:
                         x2 = x1;
                         y2 = ((myMaze.height - 1 - j) * sqSize) + sqSize;
                         break;
-                    case Action.RIGHT:
+                    case RIGHT:
                         x2 = (i * sqSize) + sqSize;
                         y2 = y1;
                         break;

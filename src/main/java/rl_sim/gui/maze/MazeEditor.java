@@ -1,11 +1,11 @@
 package rl_sim.gui.maze;
 
 import org.jetbrains.annotations.NotNull;
-import rl_sim.backend.maze.Maze;
-import rl_sim.backend.maze.Wall;
+import rl_sim.backend.State;
+import rl_sim.backend.environment.Maze;
+import rl_sim.backend.environment.Wall;
 import rl_sim.gui.GraphicsUtil;
 import rl_sim.gui.Utility;
-import rl_sim.gui.state.State;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -171,6 +171,20 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                 Color.BLACK));
     }
 
+    /**
+     * Updates the editor.
+     *
+     * @param graphics Not null.
+     */
+    private void updateGUI(@NotNull Graphics graphics) {
+        Graphics2D g2 = (Graphics2D) graphics;
+        setSize(myMaze.width * nodeLength + 4, myMaze.height * nodeLength + 4);
+        drawGoals(graphics);
+        plotMaze(g2);
+        drawWalls(g2);
+    }
+
+
     private class GridPanel extends JPanel {
 
         GridPanel() {
@@ -204,21 +218,21 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                     int lowerLimX = (nodeX * nodeLength) + (int) (0.1 * nodeLength);
                     int upperLimX = ((nodeX + 1) * nodeLength) - (int) (0.1 * nodeLength);
                     if (clickX < lowerLimX) {
-                        myMaze.addWall(new Wall(nodeX, nodeY, Wall.LEFT, penalty));
-                        myMaze.addWall(new Wall(nodeX - 1, nodeY, Wall.RIGHT, penalty));
+                        myMaze.toggleWall(new Wall(nodeX, nodeY, Wall.LEFT, penalty));
+                        myMaze.toggleWall(new Wall(nodeX - 1, nodeY, Wall.RIGHT, penalty));
                     } else if (clickX > upperLimX) {
-                        myMaze.addWall(new Wall(nodeX, nodeY, Wall.RIGHT, penalty));
-                        myMaze.addWall(new Wall(nodeX + 1, nodeY, Wall.LEFT, penalty));
+                        myMaze.toggleWall(new Wall(nodeX, nodeY, Wall.RIGHT, penalty));
+                        myMaze.toggleWall(new Wall(nodeX + 1, nodeY, Wall.LEFT, penalty));
                     }
 
                     int lowerLimY = (nodeY * nodeLength) + (int) (0.1 * nodeLength);
                     int upperLimY = ((nodeY + 1) * nodeLength) - (int) (0.1 * nodeLength);
                     if (clickY < lowerLimY) {
-                        myMaze.addWall(new Wall(nodeX, nodeY, Wall.DOWN, penalty));
-                        myMaze.addWall(new Wall(nodeX, nodeY - 1, Wall.UP, penalty));
+                        myMaze.toggleWall(new Wall(nodeX, nodeY, Wall.DOWN, penalty));
+                        myMaze.toggleWall(new Wall(nodeX, nodeY - 1, Wall.UP, penalty));
                     } else if (clickY > upperLimY) {
-                        myMaze.addWall(new Wall(nodeX, nodeY, Wall.UP, penalty));
-                        myMaze.addWall(new Wall(nodeX, nodeY + 1, Wall.DOWN, penalty));
+                        myMaze.toggleWall(new Wall(nodeX, nodeY, Wall.UP, penalty));
+                        myMaze.toggleWall(new Wall(nodeX, nodeY + 1, Wall.DOWN, penalty));
                     }
 
                     repaint();
@@ -307,7 +321,7 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                     bX = (nodeX + 1) * nodeLength;
                     aY = (myMaze.height - nodeY - 1) * nodeLength;
                     bY = (myMaze.height - nodeY - 1) * nodeLength;
-                    System.out.println("up wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
+                    // System.out.println("up wall (-" + w.penalty + ") ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
                     GraphicsUtil.drawLine(g, aX, aY, bX, bY, 5);
                     break;
                 case Wall.DOWN:
@@ -315,7 +329,7 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                     bX = (nodeX + 1) * nodeLength;
                     aY = (myMaze.height - nodeY) * nodeLength;
                     bY = (myMaze.height - nodeY) * nodeLength;
-                    System.out.println("down wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
+                    // System.out.println("down wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
                     GraphicsUtil.drawLine(g, aX, aY, bX, bY, 5);
                     break;
                 case Wall.RIGHT:
@@ -323,7 +337,7 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                     bX = (nodeX + 1) * nodeLength;
                     aY = (myMaze.height - nodeY - 1) * nodeLength;
                     bY = (myMaze.height - nodeY) * nodeLength;
-                    System.out.println("right wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
+                    //System.out.println("right wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
                     GraphicsUtil.drawLine(g, aX, aY, bX, bY, 5);
                     break;
                 case Wall.LEFT:
@@ -331,7 +345,7 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
                     bX = (nodeX) * nodeLength;
                     aY = (myMaze.height - nodeY) * nodeLength;
                     bY = (myMaze.height - nodeY - 1) * nodeLength;
-                    System.out.println("left wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
+                    //System.out.println("left wall ax,ay,bx,by= " + aX + "," + aY + "," + bX + "," + bY);
                     GraphicsUtil.drawLine(g, aX, aY, bX, bY, 5);
                     break;
             }
@@ -341,7 +355,6 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
     private void drawGoals(Graphics g) {
         int left, top, height, width;
         State curr;
-        System.out.println("size of goal vector= " + myMaze.goals.size());
         for (int i = 0; i < myMaze.goals.size(); i++) {
             curr = (myMaze.goals.get(i));
             left = curr.x * nodeLength;
@@ -402,22 +415,22 @@ public class MazeEditor extends javax.swing.JFrame implements ActionListener {
         int j = 0;
         for (int i = 0; i < myMaze.width; i++) {
             System.out.println("adding up walls");
-            myMaze.addWall(new Wall(i, j, Wall.DOWN, boundaryPenalty));
+            myMaze.toggleWall(new Wall(i, j, Wall.DOWN, boundaryPenalty));
         }
         j = myMaze.height - 1;
         for (int i = 0; i < myMaze.width; i++) {
             System.out.println("adding down walls");
-            myMaze.addWall(new Wall(i, j, Wall.UP, boundaryPenalty));
+            myMaze.toggleWall(new Wall(i, j, Wall.UP, boundaryPenalty));
         }
         int i = 0;
         for (j = 0; j < myMaze.width; j++) {
             System.out.println("adding left walls");
-            myMaze.addWall(new Wall(i, j, Wall.LEFT, boundaryPenalty));
+            myMaze.toggleWall(new Wall(i, j, Wall.LEFT, boundaryPenalty));
         }
         i = myMaze.width - 1;
         for (j = 0; j < myMaze.width; j++) {
             System.out.println("adding right walls");
-            myMaze.addWall(new Wall(i, j, Wall.RIGHT, boundaryPenalty));
+            myMaze.toggleWall(new Wall(i, j, Wall.RIGHT, boundaryPenalty));
         }
     }
 
