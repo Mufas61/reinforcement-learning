@@ -1,4 +1,4 @@
-package rl_sim.backend;
+package rl_sim.backend.environment;
 
 import rl_sim.gui.Utility;
 

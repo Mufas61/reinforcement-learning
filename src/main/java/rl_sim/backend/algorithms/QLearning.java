@@ -1,10 +1,10 @@
 package rl_sim.backend.algorithms;
 
 import org.jetbrains.annotations.NotNull;
-import rl_sim.backend.Action;
-import rl_sim.backend.ActionHandler;
-import rl_sim.backend.State;
+import rl_sim.backend.environment.Action;
+import rl_sim.backend.environment.ActionHandler;
 import rl_sim.backend.environment.Maze;
+import rl_sim.backend.environment.State;
 import rl_sim.gui.Utility;
 
 import java.util.Vector;

@@ -1,4 +1,4 @@
-package rl_sim.backend;
+package rl_sim.backend.environment;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +26,10 @@ public enum Action {
      */
     public int getValue() {
         return value;
+    }
+
+    public static Action[] valuesWithoutNone() { // TODO do I really need none!?
+        return new Action[]{UP, RIGHT, DOWN, LEFT};
     }
 
     /**

@@ -1,12 +1,12 @@
 package rl_sim.gui.algorithms;
 
-import rl_sim.backend.Action;
-import rl_sim.backend.State;
 import rl_sim.backend.algorithms.Algorithms;
 import rl_sim.backend.algorithms.PolicyIteration;
 import rl_sim.backend.algorithms.ValueFunction;
 import rl_sim.backend.algorithms.ValueIteration;
+import rl_sim.backend.environment.Action;
 import rl_sim.backend.environment.Maze;
+import rl_sim.backend.environment.State;
 import rl_sim.backend.environment.Wall;
 import rl_sim.gui.GraphicsUtil;
 import rl_sim.gui.Utility;

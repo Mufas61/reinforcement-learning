@@ -1,8 +1,8 @@
 package rl_sim.gui.maze;
 
 import org.jetbrains.annotations.NotNull;
-import rl_sim.backend.State;
 import rl_sim.backend.environment.Maze;
+import rl_sim.backend.environment.State;
 import rl_sim.backend.environment.Wall;
 import rl_sim.gui.GraphicsUtil;
 import rl_sim.gui.Utility;

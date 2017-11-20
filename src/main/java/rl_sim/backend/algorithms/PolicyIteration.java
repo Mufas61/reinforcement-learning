@@ -1,9 +1,9 @@
 package rl_sim.backend.algorithms;
 
-import rl_sim.backend.Action;
-import rl_sim.backend.ActionHandler;
-import rl_sim.backend.State;
+import rl_sim.backend.environment.Action;
+import rl_sim.backend.environment.ActionHandler;
 import rl_sim.backend.environment.Maze;
+import rl_sim.backend.environment.State;
 
 import java.util.Date;
 import java.util.Vector;

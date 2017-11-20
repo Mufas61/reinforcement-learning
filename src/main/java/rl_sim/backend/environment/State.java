@@ -1,8 +1,8 @@
-package rl_sim.backend;
+package rl_sim.backend.environment;
 
 import java.awt.*;
 
-public class State extends Point {
+public class State extends Point { // TODO cut gui dependency
 
     public State(int x, int y) {
         this.x = x;

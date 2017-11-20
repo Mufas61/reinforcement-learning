@@ -1,7 +1,6 @@
 package rl_sim.backend.environment;
 
 import org.jetbrains.annotations.NotNull;
-import rl_sim.backend.State;
 
 import java.util.Vector;
 

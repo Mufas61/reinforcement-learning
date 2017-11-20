@@ -1,10 +1,10 @@
 package rl_sim.gui.algorithms;
 
-import rl_sim.backend.Action;
-import rl_sim.backend.State;
 import rl_sim.backend.algorithms.QLearning;
 import rl_sim.backend.algorithms.ValueFunction;
+import rl_sim.backend.environment.Action;
 import rl_sim.backend.environment.Maze;
+import rl_sim.backend.environment.State;
 import rl_sim.backend.environment.Wall;
 import rl_sim.gui.GraphicsUtil;
 import rl_sim.gui.Utility;
@@ -335,7 +335,7 @@ public class QLSimulator extends javax.swing.JFrame implements ActionListener {
                     ObjectInputStream in = new ObjectInputStream(gzis);
                     myMaze = (Maze) in.readObject();
                     in.close();
-                    mazeStatus = " [ " + myMaze.width + " X " + myMaze.height + " Maze, rl_sim.Wall Penalty:" + (myMaze.walls.get(0)).penalty + "] | ";
+                    mazeStatus = " [ " + myMaze.width + " X " + myMaze.height + " Maze, Wall Penalty:" + (myMaze.walls.get(0)).penalty + "] | ";
                     algorithmStatus = " Q Learning --> Click Initialize";
 
                     sqSize = (int) Math.min(Math.floor((this.getSize().width - X - 10) / myMaze.width),
