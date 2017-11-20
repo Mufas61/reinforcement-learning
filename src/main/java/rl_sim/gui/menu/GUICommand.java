@@ -28,6 +28,11 @@ public enum GUICommand {
     Q_LEARNING_SIM("QSim"),
 
     /**
+     * Open q learning simulator.
+     */
+    MY_Q_LEARNING_SIM("MyQSim"),
+
+    /**
      * Open policy iteration.
      */
     POLICY_ITERATION("Policy"),

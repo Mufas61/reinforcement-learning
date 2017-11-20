@@ -63,6 +63,6 @@ public enum Action {
      * @return amount of possible actions.
      */
     public static int capabilities() {
-        return values().length - 1;
+        return values().length - 2;
     }
 }
