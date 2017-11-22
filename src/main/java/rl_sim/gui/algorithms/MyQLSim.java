@@ -1,8 +1,6 @@
 package rl_sim.gui.algorithms;
 
 import rl_sim.backend.algorithms.MyQLearning;
-import rl_sim.backend.algorithms.QLearning;
-import rl_sim.backend.algorithms.ValueFunction;
 import rl_sim.backend.environment.Action;
 import rl_sim.backend.environment.Maze;
 import rl_sim.backend.environment.State;
@@ -19,6 +17,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 
@@ -33,10 +33,9 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
     private JTextField sqSizeTextField;
     private JTextField jLearnRateTextField;
     private JTextField pjogTextField;
-    //	private rl_sim.backend.algorithms.Algorithms alg = null;//this is commented for q learning customization
 
     private Maze myMaze = null;
-    private MyQLearning ql;
+    private MyQLearning qLearning;
     private boolean ShowValue = true;
     private boolean ShowPolicy = true;
     private boolean Animate = true;
@@ -60,7 +59,7 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
      * Auto-generated main method to display this JFrame
      */
     public static void main(String[] args) {
-        QLSimulator inst = new QLSimulator();
+        MyQLSim inst = new MyQLSim();
         inst.setVisible(true);
     }
 
@@ -320,37 +319,37 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
                 } catch (Exception e) {
                     Utility.show(e.getMessage());
                 }
-                ql = null;
+                qLearning = null;
             }
             repaint();
         } else if (evt.getActionCommand().equals("Initialize") && myMaze != null) {
             Utility.show("My Q Learning");
 
-            double pjog = Double.parseDouble(pjogTextField.getText());
-            ql = new MyQLearning(myMaze);
-            ql.setProperty(MyQLearning.Properties.LearningRate, jLearnRateTextField.getText());
-            ql.setProperty(MyQLearning.Properties.ExplorationRate, jEpsilonTextField.getText());
+            //double pjog = Double.parseDouble(pjogTextField.getText());
+            qLearning = new MyQLearning(myMaze);
+            qLearning.setProperty(MyQLearning.Property.LearningRate, jLearnRateTextField.getText());
+            qLearning.setProperty(MyQLearning.Property.ExplorationRate, jEpsilonTextField.getText());
 
             algorithmStatus = "My Q Learning ";
             repaint();
-        } else if (evt.getActionCommand().equals("Update") && ql != null) {
-            ql.setProperty(QLearning.Properties.PJOG, pjogTextField.getText());
-            ql.setProperty(QLearning.Properties.Epsilon, jEpsilonTextField.getText());
-            ql.setProperty(QLearning.Properties.LearningRate, jLearnRateTextField.getText());
+        } else if (evt.getActionCommand().equals("Update") && qLearning != null) {
+            //ql.setProperty(MyQLearning.Property.PJOG, pjogTextField.getText());
+            qLearning.setProperty(MyQLearning.Property.ExplorationRate, jEpsilonTextField.getText());
+            qLearning.setProperty(MyQLearning.Property.LearningRate, jLearnRateTextField.getText());
         } else if (evt.getActionCommand().equals("Step")) {
             Utility.show("step");
-            if (ql != null)
-                ql.doOneStep();
-            if (ql.reachedGoal()) {
+            if (qLearning != null)
+                qLearning.computeStep();
+            if (qLearning.reachedGoal()) {
                 jStatusLabel.setText("Goal Reached");
             }
             repaint();
         } else if (evt.getActionCommand().equals("Episode")) {
             Utility.show("Episode");
             int delay = Integer.parseInt(jDelayTextField.getText());
-            if (ql != null) {
-                ql.doOneStep();
-                while (!ql.reachedGoal()) {
+            if (qLearning != null) {
+                qLearning.computeStep();
+                while (!qLearning.reachedGoal()) {
                     if (Animate) {
                         Utility.delay(delay);
                         myUpdate();
@@ -362,10 +361,10 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
             Utility.show("Cycles");
             int delay = Integer.parseInt(jDelayTextField.getText());
             int numCycles = Integer.parseInt(jCyclesTextField.getText());
-            if (ql != null) {
+            if (qLearning != null) {
                 for (int i = 0; i < numCycles; i++) {
-                    ql.doOneStep();
-                    while (!ql.reachedGoal()) {
+                    qLearning.computeStep();
+                    while (!qLearning.reachedGoal()) {
                         if (Animate) {
                             Utility.delay(delay);
                             myUpdate();
@@ -414,7 +413,7 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
     private void showGrid(Graphics g) {
         sqSize = Integer.parseInt(sqSizeTextField.getText());
 
-        if (ql != null) {
+        if (qLearning != null) {
             drawValues(g);
             if (ShowPolicy)
                 drawPolicy(g);
@@ -424,8 +423,8 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
             drawGoal(g);
             drawWalls(g);
         }
-        if (ql != null)
-            drawCurrPosition(g, ql.getCurrState());
+        if (qLearning != null)
+            drawCurrPosition(g, qLearning.getCurrState());
     }
 
     private void drawMaze(Graphics g) {
@@ -496,7 +495,7 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
         int centreY = sqSize * (myMaze.height - 1 - s.y) + sqSize / 2;
         int radius = sqSize / 5;
         Color c = Color.MAGENTA;
-        if (!ql.isBestAct)
+        if (!qLearning.getInfoForGUI().isBestAct)
             c = Color.YELLOW;
 
         GraphicsUtil.fillCircle(g, X + centreX, Y + centreY, radius, c);
@@ -508,7 +507,7 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
         GraphicsUtil.drawCircle(g, X + centreX + radius / 3, Y + centreY - radius / 3, radius / 6, 1, Color.black);
         GraphicsUtil.drawCircle(g, X + centreX + radius / 3, Y + centreY - radius / 3, 1, 1, Color.black);
 
-        if (ql.getInfoForGUI().getReceivedPenalty()) {
+        if (qLearning.getInfoForGUI().receivedPenalty) {
             GraphicsUtil.drawArc(g, X + centreX - radius / 2, Y + centreY + radius / 3, radius, 2 * radius / 3, 0, 180, Color.black);
             //rl_sim.gui.GraphicsUtil.fillArc(g,X+centreX-radius/2,Y+centreY+radius/3,radius,2*radius/3,0,180,Color.black);
         } else {
@@ -519,7 +518,7 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
 
     private void drawPolicy(Graphics g) {
         //			System.out.println("drawing policy");
-        int[][] p = ql.getInfoForGUI().getPolicy();
+        int[][] p = qLearning.getInfoForGUI().policy;
         int x1, x2, y1, y2;
         g.setColor(Color.WHITE);
         for (int i = 0; i < p.length; i++) {
@@ -552,21 +551,21 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
     }
 
     private void drawValues(Graphics g) {
-        ValueFunction valuefunc = ql.getValueFunction();
-        double[][] values = valuefunc.stateValue;
-        int max = 1 + (int) Math.ceil(valuefunc.getMax());
+        double[][] stateValue = qLearning.getInfoForGUI().getStateValues();
+        int max = 1 + (int) Math.ceil(Arrays.stream(stateValue).flatMapToDouble(Arrays::stream).max().getAsDouble()); // TODO
+        //OLD: int max = 1 + (int) Math.ceil(valuefunc.getMax());
 
-        double[][][] qsa = ql.getQsa();
+        final Map<State, Map<Action, Double>> qsa = qLearning.getQsa();
 
         for (int xval = 0; xval < myMaze.width; xval++) {
             for (int y = 0; y < myMaze.height; y++) {
                 int yval = myMaze.height - 1 - y;
-                if (values[xval][y] >= 0) {
-                    int red = 155 - Math.min((int) (255.0 * (values[xval][y]) / max), 155);
-                    int green = 155 - Math.min((int) (255.0 * (values[xval][y]) / max), 155);
-                    int b = 255 - Math.min((int) (255.0 * (values[xval][y]) / max), 220);
+                if (stateValue[xval][y] >= 0) {
+                    int red = 155 - Math.min((int) (255.0 * (stateValue[xval][y]) / max), 155);
+                    int green = 155 - Math.min((int) (255.0 * (stateValue[xval][y]) / max), 155);
+                    int blue = 255 - Math.min((int) (255.0 * (stateValue[xval][y]) / max), 220);
 
-                    g.setColor(new Color(red, green, b));
+                    g.setColor(new Color(red, green, blue));
                 } else
                     g.setColor(GoldColor);
 
@@ -577,12 +576,15 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
             return;
 
         g.setColor(Color.WHITE);
-        for (int i = 0; i < qsa.length; i++) {
-            for (int j = 0; j < qsa[i].length; j++) {
-                g.drawString(df.format(qsa[i][j][0]), X + (i * sqSize) + (sqSize / 2) - 5, Y + ((myMaze.height - j) * sqSize) - sqSize + 15);
-                g.drawString(df.format(qsa[i][j][1]), X + (i * sqSize) + sqSize - 20, Y + ((myMaze.height - j) * sqSize) - (sqSize / 2));
-                g.drawString(df.format(qsa[i][j][2]), X + (i * sqSize) + (sqSize / 2) - 5, Y + ((myMaze.height - j) * sqSize) - 5);
-                g.drawString(df.format(qsa[i][j][3]), X + (i * sqSize) + 5, Y + ((myMaze.height - j) * sqSize) - (sqSize / 2));
+        for (int i = 0; i < myMaze.width; i++) {
+            int j = 0;
+            final Map<Action, Double> actionValueMap = qsa.get(new State(i, j));
+            while (j < myMaze.height) { // TODO State.valueOf(i,j)
+                g.drawString(df.format(actionValueMap.get(Action.UP)), X + (i * sqSize) + (sqSize / 2) - 5, Y + ((myMaze.height - j) * sqSize) - sqSize + 15);
+                g.drawString(df.format(actionValueMap.get(Action.RIGHT)), X + (i * sqSize) + sqSize - 20, Y + ((myMaze.height - j) * sqSize) - (sqSize / 2));
+                g.drawString(df.format(actionValueMap.get(Action.DOWN)), X + (i * sqSize) + (sqSize / 2) - 5, Y + ((myMaze.height - j) * sqSize) - 5);
+                g.drawString(df.format(actionValueMap.get(Action.LEFT)), X + (i * sqSize) + 5, Y + ((myMaze.height - j) * sqSize) - (sqSize / 2));
+                j++;
             }
         }
 

@@ -4,16 +4,11 @@ import java.awt.*;
 
 public class State extends Point { // TODO cut gui dependency
 
+    private static final long serialVersionUID = -5276940640259749850L;
+
     public State(int x, int y) {
         this.x = x;
         this.y = y;
-    }
-
-    /**
-     * Used for debugging only...
-     */
-    public void printState() {
-        System.out.print("State=<" + x + "," + y + ">");
     }
 
     /**
@@ -34,4 +29,8 @@ public class State extends Point { // TODO cut gui dependency
         return (x == st.x && y == st.y);
     }
 
+    @Override
+    public String toString() {
+        return String.format("(x:%d,y:%d)", x, y);
+    }
 }

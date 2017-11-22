@@ -7,8 +7,6 @@ import rl_sim.backend.environment.Maze;
 import rl_sim.backend.environment.State;
 import rl_sim.gui.Utility;
 
-import java.util.Vector;
-
 public class QLearning {
 
     private static final int PATH_COST = 1;
@@ -40,13 +38,6 @@ public class QLearning {
 
     private double learningRate;
 
-    private ValueFunction optVals;
-    private ValueFunction evaluatedVals;
-    private int[][] optPolicy;
-    private boolean isOptValCalc;
-    private double PRECISION = 0.01;
-
-
     public static class Properties {
         public static int PJOG = 1;
         public static int LearningRate = 2;
@@ -77,9 +68,6 @@ public class QLearning {
         this.policy = new int[environment.width][environment.height];
         this.qsa = new double[environment.width][environment.height][Action.capabilities()];
         initialize();
-
-        evaluatedVals = new ValueFunction(environment.width, environment.height);
-        optVals = new ValueFunction(environment.width, environment.height);
     }
 
     private void initialize() {
@@ -187,7 +175,6 @@ public class QLearning {
         return currState;
     }
 
-
     /**
      * returns the best action with probability (1-pjog)
      * returns other actions with prob. (1-pjog)/numOfActions
@@ -226,11 +213,9 @@ public class QLearning {
 
     private double getMinQsa(State st) {
         double min = qsa[st.x][st.y][0];
-        int bestAction = 0;
         for (int i = 0; i < qsa[st.x][st.y].length; i++) {
             if (min > qsa[st.x][st.y][i]) {
                 min = qsa[st.x][st.y][i];
-                bestAction = i;
             }
         }
         return min;
@@ -240,106 +225,6 @@ public class QLearning {
         return environment.goals.contains(s);
     }
 
-    public int[][] getOptPolicy() {
-        return optPolicy;
-    }
 
-    public ValueFunction getEvaluatedVals() {
-        return evaluatedVals;
-    }
-
-    public ValueFunction getOptVals() {
-        return optVals;
-    }
-
-    private void calcTrueValues() {
-//		System.out.println("calc'ing opt values");
-        ValueIteration valitr = new ValueIteration(environment, pjog, 0.01);
-        while (!valitr.step()) ;
-        optVals = valitr.getValueFunction();
-        optPolicy = valitr.getPolicy();
-        isOptValCalc = true;
-    }
-
-    private double computeScore() {
-        double netScore = 0;
-        for (int i = 0; i < evaluatedVals.stateValue.length; i++)
-            for (int j = 0; j < evaluatedVals.stateValue[i].length; j++) {
-                netScore += Math.abs(optVals.stateValue[i][j] - evaluatedVals.stateValue[i][j]);
-            }
-        return netScore;
-    }
-
-    public double evalPolicy() {
-        evaluatedVals.initialize();
-        ValueFunction evalVals = new ValueFunction(environment.width, environment.height);
-        ValueFunction prevEvalVals = new ValueFunction(environment.width, environment.height);
-        prevEvalVals.initialize();
-
-        State currState, desiredNextState;
-        double maxDelta = 0, delta = 0, v = 0, maxV, minV = 10000, prob, safe;
-        boolean valueConverged = false;
-        int valueIters = 0, MAX_VALUE_ALLOWED = 1000;
-
-        while (!valueConverged) {
-            evalVals.initialize();
-            maxDelta = 0;
-            maxV = 0;
-            for (int i = 0; i < environment.width; i++) {
-                for (int j = 0; j < environment.height; j++) {
-                    v = 0;
-                    currState = new State(i, j);
-                    if (environment.goals.contains(currState)) {
-                        evalVals.stateValue[i][j] = 0;
-                        continue;
-                    }
-                    Vector allNext = new Vector(environment.getSuccessors(currState));    //vector of successor states
-                    if (-1 == policy[i][j]) {
-                        evalVals.stateValue[i][j] = 0;
-                        continue;
-                    }
-
-                    desiredNextState = ActionHandler.performAction(currState, Action.valueOf(policy[i][j]));
-
-                    for (Object anAllNext : allNext) {
-                        State s = (State) anAllNext;
-
-                        if (!desiredNextState.equals(s))
-                            prob = pjog / (Action.capabilities() - 1);
-                        else
-                            prob = 1 - pjog;
-
-                        if (environment.isValidTransition(currState, s))
-                            safe = prevEvalVals.stateValue[s.x][s.y];
-                        else
-                            safe = environment.getReward(currState, s) + prevEvalVals.stateValue[i][j];
-
-                        v += prob * safe;
-                    }
-                    v = v + 1;//this 1 is added as pathcost or transition cost
-                    evalVals.stateValue[i][j] = v;
-
-                    maxV = (maxV < v) ? v : maxV;
-
-                    delta = Math.abs(evalVals.stateValue[i][j] - prevEvalVals.stateValue[i][j]);
-                    if (maxDelta < delta)
-                        maxDelta = delta;
-                }
-            }
-            valueIters++;
-
-            if (maxDelta < PRECISION)
-                valueConverged = true;
-
-            if (maxV > MAX_VALUE_ALLOWED)
-                valueConverged = true;
-
-            for (int i = 0; i < environment.width; i++)
-                System.arraycopy(evalVals.stateValue[i], 0, prevEvalVals.stateValue[i], 0, environment.height);
-        }
-        for (int i = 0; i < environment.width; i++)
-            System.arraycopy(evalVals.stateValue[i], 0, evaluatedVals.stateValue[i], 0, environment.height);
-        return computeScore();
-    }
 
 }
