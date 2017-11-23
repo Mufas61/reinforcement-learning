@@ -29,6 +29,8 @@ public class State extends Point { // TODO cut gui dependency
         return (x == st.x && y == st.y);
     }
 
+    // TODO valueOf with cacheing
+
     @Override
     public String toString() {
         return String.format("(x:%d,y:%d)", x, y);

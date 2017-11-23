@@ -552,10 +552,8 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
 
     private void drawValues(Graphics g) {
         double[][] stateValue = qLearning.getInfoForGUI().getStateValues();
-        int max = 1 + (int) Math.ceil(Arrays.stream(stateValue).flatMapToDouble(Arrays::stream).max().getAsDouble()); // TODO
+        int max = 1 + (int) Math.ceil(Arrays.stream(stateValue).flatMapToDouble(Arrays::stream).max().getAsDouble()); // TODO ??
         //OLD: int max = 1 + (int) Math.ceil(valuefunc.getMax());
-
-        final Map<State, Map<Action, Double>> qsa = qLearning.getQsa();
 
         for (int xval = 0; xval < myMaze.width; xval++) {
             for (int y = 0; y < myMaze.height; y++) {
@@ -575,11 +573,13 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
         if (!ShowValue)
             return;
 
+        final Map<State, Map<Action, Double>> qsa = qLearning.getQsa();
+
         g.setColor(Color.WHITE);
         for (int i = 0; i < myMaze.width; i++) {
             int j = 0;
-            final Map<Action, Double> actionValueMap = qsa.get(new State(i, j));
             while (j < myMaze.height) { // TODO State.valueOf(i,j)
+                final Map<Action, Double> actionValueMap = qsa.get(new State(i, j));
                 g.drawString(df.format(actionValueMap.get(Action.UP)), X + (i * sqSize) + (sqSize / 2) - 5, Y + ((myMaze.height - j) * sqSize) - sqSize + 15);
                 g.drawString(df.format(actionValueMap.get(Action.RIGHT)), X + (i * sqSize) + sqSize - 20, Y + ((myMaze.height - j) * sqSize) - (sqSize / 2));
                 g.drawString(df.format(actionValueMap.get(Action.DOWN)), X + (i * sqSize) + (sqSize / 2) - 5, Y + ((myMaze.height - j) * sqSize) - 5);

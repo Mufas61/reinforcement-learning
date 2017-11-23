@@ -175,10 +175,9 @@ public class MyQLearning {
         LOG.debug(String.format("Update Q(%s,%s) -> %f", currState, chosenAction, currQ));
         Q(currState, chosenAction, currQ); // update Q(s,a)
 
-        currState = environment.isValidTransition(currState, nextState) ? nextState : currState;
 
-        episodes++;
-        infoForGUI.policy[currState.x][currState.y] = policy(currState).getValue();
+        infoForGUI.policy[currState.x][currState.y] = minQ(currState).getKey().getValue(); // update for gui
+        currState = environment.isValidTransition(currState, nextState) ? nextState : currState;
     }
 
     /**
@@ -186,6 +185,7 @@ public class MyQLearning {
      */
     private void initForNewEpisode() {
         currState = start;
+        episodes++;
         discounting = Math.pow(discounting, episodes);
         LOG.debug("new discounting is: " + discounting);
     }
@@ -246,22 +246,22 @@ public class MyQLearning {
      * @return
      */
     private Action policy(@NotNull final State currState) { // TODO test this
-        LOG.debug("=> Policy");
+        LOG.debug(">>> Policy");
         final Action bestAction = minQ(currState).getKey();
-        double explor = exploration * (Action.capabilities());
+        double explorationForEachAction = exploration / (Action.capabilities());
         Action chosenAction = bestAction;
 
-        final double random = Math.random();
         for (int i = 0; i < Action.capabilities(); i++) { // TODO here Don't understand
-            if (random < (i + 1) * explor) {
+            if (Math.random() <= (i + 1) * explorationForEachAction) {
                 chosenAction = Action.valueOf(i);
                 break;
             }
         }
-        LOG.debug("BestAction:" + bestAction);
-        LOG.debug("ChosenAction:" + chosenAction);
-        infoForGUI.isBestAct = chosenAction == bestAction;
 
+        boolean hashChosenBestAction = chosenAction == bestAction;
+        infoForGUI.isBestAct = hashChosenBestAction;
+        LOG.debug("Chosen Action:" + chosenAction + ((hashChosenBestAction) ? "" : "-> best was:" + bestAction));
+        LOG.debug("<<<");
         return chosenAction;
     }
 
