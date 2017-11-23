@@ -348,13 +348,14 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
             Utility.show("Episode");
             int delay = Integer.parseInt(jDelayTextField.getText());
             if (qLearning != null) {
-                qLearning.computeStep();
                 while (!qLearning.reachedGoal()) {
+                    qLearning.computeStep();
                     if (Animate) {
                         Utility.delay(delay);
                         myUpdate();
                     }
                 }
+                qLearning.computeStep();
                 repaint();
             }
         } else if (evt.getActionCommand().equals("Cycles")) {
@@ -363,13 +364,14 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
             int numCycles = Integer.parseInt(jCyclesTextField.getText());
             if (qLearning != null) {
                 for (int i = 0; i < numCycles; i++) {
-                    qLearning.computeStep();
                     while (!qLearning.reachedGoal()) {
+                        qLearning.computeStep();
                         if (Animate) {
                             Utility.delay(delay);
                             myUpdate();
                         }
                     }
+                    qLearning.computeStep();
                 }
                 repaint();
             }
