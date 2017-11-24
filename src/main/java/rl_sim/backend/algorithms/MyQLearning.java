@@ -44,17 +44,17 @@ public class MyQLearning {
     private int costPerStep = 1;
 
     /**
-     * Learning rate. // TODO Eng.: Neu erlerntes soll nicht alles zuvor gelernte überschreiben.
+     * Percentage of how much of the new learned should be calculated to the overall result.
      */
     private double learning = 0.2;
 
     /**
-     * Discounting rate. TODO Eng.: Jeder neue Schritt wird abgeschwächt.
+     * Discounting rate. Every new episode will be attenuated.
      */
-    private double discounting = 0.9;
+    private double discounting;
 
     /**
-     * Exploration rate. // TODO Eng.: Kleine Wahrscheinlichkeit eine andere Aktion als die beste zu wählen um vlt. bessere Wege zu entdecken.
+     * Percentage of exploration. Given chance that a random {@link Action} will be chosen and not the best.
      */
     private double exploration = 0.1;
 
@@ -74,8 +74,16 @@ public class MyQLearning {
      */
     private State nextState;
 
-    public int episodes = 0;
+    /**
+     * Amount of done episodes (start -> goal).
+     */
+    private int episodes = 0;
 
+    /**
+     * Constructor.
+     *
+     * @param environment Not null.
+     */
     public MyQLearning(@NotNull final Maze environment) {
         this.environment = environment;
         this.infoForGUI = new InfoForGUI();
@@ -103,8 +111,7 @@ public class MyQLearning {
         currState = start;
         isInitialized = true;
         episodes = 0;
-        discounting = 0.9; // because will be change for every episode
-        // TODO update properties here
+        discounting = 0.9; // reinitialization because will be changed for every episode
     }
 
     /**
@@ -112,21 +119,21 @@ public class MyQLearning {
      */
     public void computeStep() {
         Preconditions.checkState(isInitialized, "Algorithm has to be initialized!");
+
         LOG.debug("======== STEP ========");
         // break condition if not computed by episode
         if (reachedGoal()) {
-            initForNewEpisode();
+            prepareNewEpisode();
             return;
         }
 
-        // TODO add do nothing
         // choose an action a TODO e-greedy-stuff
-        final Action chosenAction = policy(currState);
+        final Action action = chosePolicy(currState);
 
-        nextState = ActionHandler.performAction(currState, chosenAction);
+        nextState = ActionHandler.performAction(currState, action);
 
-        double currQ = Q(currState, chosenAction);
-        LOG.debug(String.format("Current Q(%s,%s) => %f", currState, chosenAction, currQ));
+        double currQ = Q(currState, action);
+        LOG.debug(String.format("Current Q(%s,%s) => %f", currState, action, currQ));
 
         //If not a valid transition stay in same state and add penalty
         double reward = handleTransition(currState, nextState);
@@ -140,8 +147,8 @@ public class MyQLearning {
         // Q(s,a) <- Q(s,a) + a [r + y * max_a'(Q(s',a')) - Q(s,a)]
         currQ += learning * (reward + discounting * nextQ - currQ);
 
-        LOG.debug(String.format("Update Q(%s,%s) <= %f", currState, chosenAction, currQ));
-        Q(currState, chosenAction, currQ); // update Q(s,a)
+        LOG.debug(String.format("Update Q(%s,%s) <= %f", currState, action, currQ));
+        Q(currState, action, currQ); // update Q(s,a)
 
 
         infoForGUI.policy[currState.x][currState.y] = minQ(currState).getKey().getValue(); // update for gui
@@ -151,7 +158,7 @@ public class MyQLearning {
     /**
      * Reset after goal has reached.
      */
-    private void initForNewEpisode() {
+    private void prepareNewEpisode() {
         currState = start;
         episodes++;
         discounting = Math.pow(discounting, episodes);
@@ -185,7 +192,7 @@ public class MyQLearning {
      *
      * @param currState    Not null.
      * @param chosenAction Not null.
-     * @return
+     * @return TODO return
      */
     private Double Q(@NotNull final State currState,
                      @NotNull final Action chosenAction) {
@@ -211,20 +218,14 @@ public class MyQLearning {
      * Returns an chosen action by a policy.
      *
      * @param currState Not null.
-     * @return
+     * @return TODO return
      */
-    private Action policy(@NotNull final State currState) { // TODO test this
-        LOG.debug(">>> Policy");
+    private Action chosePolicy(@NotNull final State currState) { // TODO test this
+        LOG.debug(">>> Chose policy");
         final Action bestAction = minQ(currState).getKey();
-        double explorationForEachAction = exploration / (Action.capabilities());
         Action chosenAction = bestAction;
 
-        for (int i = 0; i < Action.capabilities(); i++) { // TODO here Don't understand
-            if (Math.random() <= (i + 1) * explorationForEachAction) {
-                chosenAction = Action.valueOf(i);
-                break;
-            }
-        }
+        chosenAction = handleExploration(chosenAction);
 
         boolean hashChosenBestAction = chosenAction == bestAction;
         infoForGUI.isBestAct = hashChosenBestAction;
@@ -234,10 +235,29 @@ public class MyQLearning {
     }
 
     /**
+     * Handles the chance for an exploration.
+     *
+     * @param chosenAction Not null.
+     * @return a random {@link Action} by the chance of the given {@link #exploration} or the given object.
+     */
+    @NotNull
+    private Action handleExploration(@NotNull Action chosenAction) {
+        for (int i = 0; i < Action.capabilities(); i++) {
+            final double chanceForEachAction = exploration / (Action.capabilities());
+            final int rangeOfAction = i + 1;
+            if (Math.random() <= rangeOfAction * chanceForEachAction) {
+                chosenAction = Action.valueOf(i);
+                break;
+            }
+        }
+        return chosenAction;
+    }
+
+    /**
      * Returns the min q-value for an given state.
      *
      * @param currState Not null.
-     * @return
+     * @return TODO return really Nullable?
      */
     private Map.Entry<Action, Double> minQ(@NotNull final State currState) { // TODO test this
         final Map<Action, Double> actionValueMap = q_sa.get(currState);
