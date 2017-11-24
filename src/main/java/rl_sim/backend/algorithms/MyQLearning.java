@@ -65,11 +65,6 @@ public class MyQLearning {
     private final Maze environment;
 
     /**
-     * Algorithm has finished -> best way has been found.
-     */
-    private boolean converged;
-
-    /**
      * Holds current state.
      */
     private State currState;
@@ -107,32 +102,9 @@ public class MyQLearning {
         start = new State(0, 0); // bottom left corner.
         currState = start;
         isInitialized = true;
-        converged = false;
         episodes = 0;
         discounting = 0.9; // because will be change for every episode
         // TODO update properties here
-    }
-
-    /**
-     * Runs the algorithm.
-     */
-    public void compute() {
-        Preconditions.checkState(isInitialized, "Algorithm has to be initialized!");
-        do {
-            computeEpisode();
-        } while (converged); // Best way has been found
-    }
-
-    /**
-     * Runs one episode (from start to goal) of the algorithm.
-     */
-    public void computeEpisode() {
-        Preconditions.checkState(isInitialized, "Algorithm has to be initialized!");
-
-        currState = start;
-        do {
-            computeStep();
-        } while (reachedGoal()); //until s ist ein endzustand);
     }
 
     /**
