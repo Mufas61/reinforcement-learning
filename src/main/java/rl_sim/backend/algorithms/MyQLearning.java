@@ -21,32 +21,20 @@ public class MyQLearning {
     private boolean isInitialized = false;
 
     /**
-     * Q(s,a) - immediate reward + discounted reward.
-     * Q-value for every state-action-combination.
-     */
-    @NotNull
-    private final Map<State, Map<Action, Double>> q_sa;
-
-    /**
      * Holds all information for the gui that wouldn't been necessary for the algorithm.
      */
     @NotNull
     private InfoForGUI infoForGUI;
 
     /**
-     * First state in every new round. Bottom left corner.
-     */
-    private State start;
-
-    /**
      * Penalty per step.
      */
-    private int costPerStep = 1;
+    private int costPerStep = -1;
 
     /**
      * Percentage of how much of the new learned should be calculated to the overall result.
      */
-    private double learning = 0.2;
+    private double learning = 0.7;
 
     /**
      * Discounting rate. Every new episode will be attenuated.
@@ -65,6 +53,11 @@ public class MyQLearning {
     private final Maze environment;
 
     /**
+     * First state in every new round. Bottom left corner.
+     */
+    private State start;
+
+    /**
      * Holds current state.
      */
     private State currState;
@@ -78,6 +71,13 @@ public class MyQLearning {
      * Amount of done episodes (start -> goal).
      */
     private int episodes = 0;
+
+    /**
+     * Q(s,a) - immediate reward + discounted reward.
+     * Q-value for every state-action-combination.
+     */
+    @NotNull
+    private final Map<State, Map<Action, Double>> q_sa;
 
     /**
      * Constructor.
@@ -139,7 +139,7 @@ public class MyQLearning {
         double reward = handleTransition(currState, nextState);
         LOG.debug(String.format("Reward/Penalty for %s->%s => %f", currState, nextState, reward));
 
-        final double nextQ = minQ(nextState).getValue();
+        final double nextQ = bestQ(nextState).getValue();
         LOG.debug(String.format("min_a(Q(%s,a)) => %f", nextState, nextQ));
 
         LOG.debug("currQ += learning * (r + (discounting * nextQ) - currQ)");
@@ -151,7 +151,7 @@ public class MyQLearning {
         Q(currState, action, currQ); // update Q(s,a)
 
 
-        infoForGUI.policy[currState.x][currState.y] = minQ(currState).getKey().getValue(); // update for gui
+        infoForGUI.policy[currState.x][currState.y] = bestQ(currState).getKey().getValue(); // update for gui
         currState = environment.isValidTransition(currState, nextState) ? nextState : currState;
     }
 
@@ -159,10 +159,12 @@ public class MyQLearning {
      * Reset after goal has reached.
      */
     private void prepareNewEpisode() {
+        LOG.debug(">>> prepare new episode");
         currState = start;
         episodes++;
         discounting = Math.pow(discounting, episodes);
         LOG.debug("new discounting is: " + discounting);
+        LOG.debug("<<<");
     }
 
     /**
@@ -222,7 +224,7 @@ public class MyQLearning {
      */
     private Action chosePolicy(@NotNull final State currState) { // TODO test this
         LOG.debug(">>> Chose policy");
-        final Action bestAction = minQ(currState).getKey();
+        final Action bestAction = bestQ(currState).getKey();
         Action chosenAction = bestAction;
 
         chosenAction = handleExploration(chosenAction);
@@ -254,17 +256,17 @@ public class MyQLearning {
     }
 
     /**
-     * Returns the min q-value for an given state.
+     * Returns the best q-value for an given state.
      *
      * @param currState Not null.
      * @return TODO return really Nullable?
      */
-    private Map.Entry<Action, Double> minQ(@NotNull final State currState) { // TODO test this
+    private Map.Entry<Action, Double> bestQ(@NotNull final State currState) { // TODO test this
         final Map<Action, Double> actionValueMap = q_sa.get(currState);
         final Set<Map.Entry<Action, Double>> entrySet = actionValueMap.entrySet();
         return entrySet
                 .stream()
-                .min(Comparator.comparingDouble(Map.Entry::getValue))
+                .max(Comparator.comparingDouble(Map.Entry::getValue))
                 .orElse(null);
 
     }
@@ -354,7 +356,7 @@ public class MyQLearning {
             double[][] stateValue = new double[environment.width][environment.height];
             for (int i = 0; i < environment.width; i++)
                 for (int j = 0; j < environment.height; j++)
-                    stateValue[i][j] = minQ(new State(i, j)).getValue();
+                    stateValue[i][j] = bestQ(new State(i, j)).getValue();
             return stateValue;
         }
     }

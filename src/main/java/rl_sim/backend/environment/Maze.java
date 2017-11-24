@@ -73,7 +73,10 @@ public class Maze implements Environment, Serializable {
         int index = walls.indexOf(possibleWall);
         if (index != -1) {
             Wall w = walls.get(index);
-            return w.penalty;
+            return -w.penalty;
+        }
+        if (goals.contains(curr)){
+            return State.REWARD_FOR_GOAL;
         }
         return 0;
     }

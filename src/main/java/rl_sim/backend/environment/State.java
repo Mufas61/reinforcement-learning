@@ -6,6 +6,11 @@ public class State extends Point { // TODO cut gui dependency
 
     private static final long serialVersionUID = -5276940640259749850L;
 
+    /**
+     * Reward, if state is a goal.
+     */
+    public static final double REWARD_FOR_GOAL = 100;
+
     public State(int x, int y) {
         this.x = x;
         this.y = y;
