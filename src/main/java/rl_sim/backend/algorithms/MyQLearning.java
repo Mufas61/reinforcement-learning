@@ -122,27 +122,25 @@ public class MyQLearning {
         // TODO add do nothing
         // choose an action a TODO e-greedy-stuff
         final Action chosenAction = policy(currState);
-        LOG.debug(String.format("Chosen action for %s: %s", currState, chosenAction));
 
         nextState = ActionHandler.performAction(currState, chosenAction);
-        LOG.debug(String.format("Next State should be %s", nextState));
 
         double currQ = Q(currState, chosenAction);
-        LOG.debug(String.format("Q-value for %s is %f", currState, currQ));
+        LOG.debug(String.format("Current Q(%s,%s) => %f", currState, chosenAction, currQ));
 
         //If not a valid transition stay in same state and add penalty
         double reward = handleTransition(currState, nextState);
+        LOG.debug(String.format("Reward/Penalty for %s->%s => %f", currState, nextState, reward));
 
         final double nextQ = minQ(nextState).getValue();
-        LOG.debug(String.format("Min q-value for %s is %f", nextState, nextQ));
+        LOG.debug(String.format("min_a(Q(%s,a)) => %f", nextState, nextQ));
 
-        LOG.debug(String.format("Reward/Penalty from %s to %s is %f", currState, nextState, reward));
         LOG.debug("currQ += learning * (r + (discounting * nextQ) - currQ)");
         LOG.debug(String.format("%f += %f * (%f + (%f * %f) - %f)", currQ, learning, reward, discounting, nextQ, currQ));
         // Q(s,a) <- Q(s,a) + a [r + y * max_a'(Q(s',a')) - Q(s,a)]
         currQ += learning * (reward + discounting * nextQ - currQ);
 
-        LOG.debug(String.format("Update Q(%s,%s) -> %f", currState, chosenAction, currQ));
+        LOG.debug(String.format("Update Q(%s,%s) <= %f", currState, chosenAction, currQ));
         Q(currState, chosenAction, currQ); // update Q(s,a)
 
 
