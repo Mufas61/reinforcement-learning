@@ -28,7 +28,7 @@ public enum Action {
         return value;
     }
 
-    public static Action[] valuesWithoutNone() { // TODO do I really need none!?
+    public static Action[] valuesWithoutNone() {
         return new Action[]{UP, RIGHT, DOWN, LEFT};
     }
 
