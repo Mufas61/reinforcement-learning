@@ -10,21 +10,21 @@ import rl_sim.gui.Utility;
  * @author ryk
  */
 
-public class ValueFunction {
+public class OLDValueFunction {
 
     public double[][] stateValue;
     double[][][] qValues;
 
     //this constructor is used when you have knowledge about the environment
     //example by valueIteration and policy iteration - model based algorithms
-    public ValueFunction(int width, int height) {
+    public OLDValueFunction(int width, int height) {
         stateValue = new double[width][height];
         qValues = null;
     }
 
     //this constructor is used when you donr have any knowledge about the environment
     //example by Q learning prioritized sweeping - model free algorithms
-    public ValueFunction(int width, int height, int numOfActions) {
+    public OLDValueFunction(int width, int height, int numOfActions) {
         stateValue = null;
         qValues = new double[width][height][numOfActions];
     }

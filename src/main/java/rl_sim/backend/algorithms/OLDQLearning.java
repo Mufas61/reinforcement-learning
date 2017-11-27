@@ -7,7 +7,7 @@ import rl_sim.backend.environment.Maze;
 import rl_sim.backend.environment.State;
 import rl_sim.gui.Utility;
 
-public class QLearning {
+public class OLDQLearning {
 
     private static final int PATH_COST = 1;
 
@@ -33,7 +33,7 @@ public class QLearning {
     public boolean receivedPenalty = false;
     private State start, currState;
 
-    private ValueFunction currValues;
+    private OLDValueFunction currValues;
     private int numEpisodes;
 
     private double learningRate;
@@ -54,7 +54,7 @@ public class QLearning {
      * @param epsilon      Exploration.
      * @param decayingLR
      */
-    public QLearning(@NotNull Maze maze, double pjog, double learningRate, double epsilon, boolean decayingLR) {
+    public OLDQLearning(@NotNull Maze maze, double pjog, double learningRate, double epsilon, boolean decayingLR) {
         this.environment = maze;
         this.pjog = pjog;
         this.maxLearningRate = learningRate;
@@ -64,7 +64,7 @@ public class QLearning {
         this.start = new State(0, 0);
         this.currState = new State(0, 0);
 
-        this.currValues = new ValueFunction(environment.width, environment.height);
+        this.currValues = new OLDValueFunction(environment.width, environment.height);
         this.policy = new int[environment.width][environment.height];
         this.qsa = new double[environment.width][environment.height][Action.capabilities()];
         initialize();
@@ -154,7 +154,7 @@ public class QLearning {
         return false;
     }
 
-    public ValueFunction getValueFunction() {
+    public OLDValueFunction getValueFunction() {
 
         for (int i = 0; i < environment.width; i++)
             for (int j = 0; j < environment.height; j++)

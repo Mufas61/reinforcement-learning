@@ -1,7 +1,7 @@
 package rl_sim.gui.menu;
 
 import rl_sim.gui.algorithms.MyQLSim;
-import rl_sim.gui.algorithms.QLSimulator;
+import rl_sim.gui.algorithms.OLDQLSimulator;
 import rl_sim.gui.maze.MazeEditor;
 
 import javax.swing.*;
@@ -112,7 +112,7 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
             MazeEditor inst = new MazeEditor();
             inst.setVisible(true);
         } else if (evt.getActionCommand().equals(GUICommand.Q_LEARNING_SIM.getValue())) {
-            QLSimulator inst = new QLSimulator();
+            OLDQLSimulator inst = new OLDQLSimulator();
             inst.setVisible(true);
         } else if (evt.getActionCommand().equals(GUICommand.MY_Q_LEARNING_SIM.getValue())) {
             MyQLSim inst = new MyQLSim();

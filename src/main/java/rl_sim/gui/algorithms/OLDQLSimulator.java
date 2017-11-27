@@ -1,7 +1,7 @@
 package rl_sim.gui.algorithms;
 
-import rl_sim.backend.algorithms.QLearning;
-import rl_sim.backend.algorithms.ValueFunction;
+import rl_sim.backend.algorithms.OLDQLearning;
+import rl_sim.backend.algorithms.OLDValueFunction;
 import rl_sim.backend.environment.Action;
 import rl_sim.backend.environment.Maze;
 import rl_sim.backend.environment.State;
@@ -23,7 +23,7 @@ import java.util.zip.GZIPInputStream;
 
 import static rl_sim.gui.GraphicsUtil.LOOK_AND_FEEL;
 
-public class QLSimulator extends javax.swing.JFrame implements ActionListener {
+public class OLDQLSimulator extends javax.swing.JFrame implements ActionListener {
     private JPanel jPanel;
     private JButton jLoadButton;
     private JSeparator jSeparator1;
@@ -52,7 +52,7 @@ public class QLSimulator extends javax.swing.JFrame implements ActionListener {
     //	private rl_sim.backend.algorithms.Algorithms alg = null;//this is commented for q learning customization
 
     private Maze myMaze = null;
-    private QLearning ql;
+    private OLDQLearning ql;
     private boolean ShowValue = true;
     private boolean ShowPolicy = true;
     private boolean Animate = true;
@@ -80,11 +80,11 @@ public class QLSimulator extends javax.swing.JFrame implements ActionListener {
      * Auto-generated main method to display this JFrame
      */
     public static void main(String[] args) {
-        QLSimulator inst = new QLSimulator();
+        OLDQLSimulator inst = new OLDQLSimulator();
         inst.setVisible(true);
     }
 
-    public QLSimulator() {
+    public OLDQLSimulator() {
         super("RL-MDP:Simulation");
         initGUI();
 
@@ -326,7 +326,7 @@ public class QLSimulator extends javax.swing.JFrame implements ActionListener {
             //fileChooser
             fc = new JFileChooser("./mazes/");
 
-            int returnVal = fc.showOpenDialog(QLSimulator.this);
+            int returnVal = fc.showOpenDialog(OLDQLSimulator.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     File file = fc.getSelectedFile();
@@ -359,18 +359,18 @@ public class QLSimulator extends javax.swing.JFrame implements ActionListener {
             double learningRate = Double.parseDouble((jLearnRateTextField.getText()));
             double epsilon = Double.parseDouble((jEpsilonTextField.getText()));
             boolean decayingLR = jDecayLRCheckBox.isSelected();
-            ql = new QLearning(myMaze, pjog, learningRate, epsilon, decayingLR);
+            ql = new OLDQLearning(myMaze, pjog, learningRate, epsilon, decayingLR);
 
             algorithmStatus = " Q Learning ";
             repaint();
         } else if (evt.getActionCommand().equals("Update") && ql != null) {
-            ql.setProperty(QLearning.Properties.PJOG, pjogTextField.getText());
-            ql.setProperty(QLearning.Properties.Epsilon, jEpsilonTextField.getText());
-            ql.setProperty(QLearning.Properties.LearningRate, jLearnRateTextField.getText());
+            ql.setProperty(OLDQLearning.Properties.PJOG, pjogTextField.getText());
+            ql.setProperty(OLDQLearning.Properties.Epsilon, jEpsilonTextField.getText());
+            ql.setProperty(OLDQLearning.Properties.LearningRate, jLearnRateTextField.getText());
             if (jDecayLRCheckBox.isSelected())
-                ql.setProperty(QLearning.Properties.DecayingLR, "true");
+                ql.setProperty(OLDQLearning.Properties.DecayingLR, "true");
             else
-                ql.setProperty(QLearning.Properties.DecayingLR, "false");
+                ql.setProperty(OLDQLearning.Properties.DecayingLR, "false");
         } else if (evt.getActionCommand().equals("Step")) {
             Utility.show("step");
             if (ql != null)
@@ -584,7 +584,7 @@ public class QLSimulator extends javax.swing.JFrame implements ActionListener {
     }
 
     private void drawValues(Graphics g) {
-        ValueFunction valuefunc = ql.getValueFunction();
+        OLDValueFunction valuefunc = ql.getValueFunction();
         double[][] values = valuefunc.stateValue;
         int max = 1 + (int) Math.ceil(valuefunc.getMax());
 
