@@ -75,7 +75,7 @@ public class Maze implements Environment, Serializable {
             Wall w = walls.get(index);
             return -w.penalty;
         }
-        if (goals.contains(curr)){
+        if (goals.contains(state)) {
             return State.REWARD_FOR_GOAL;
         }
         return 0;

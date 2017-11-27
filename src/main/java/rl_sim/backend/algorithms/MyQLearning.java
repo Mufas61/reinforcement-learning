@@ -29,7 +29,7 @@ public class MyQLearning {
     /**
      * Penalty per step.
      */
-    private int costPerStep = -1;
+    private double costPerStep = -0.5;
 
     /**
      * Percentage of how much of the new learned should be calculated to the overall result.
@@ -77,7 +77,7 @@ public class MyQLearning {
      * Q-value for every state-action-combination.
      */
     @NotNull
-    private final Map<State, Map<Action, Double>> q_sa;
+    private final Map<State, Map<Action, Double>> actionValueFunction;
 
     /**
      * Constructor.
@@ -87,7 +87,7 @@ public class MyQLearning {
     public MyQLearning(@NotNull final Maze environment) {
         this.environment = environment;
         this.infoForGUI = new InfoForGUI();
-        this.q_sa = new HashMap<>(); // TODO maybe treemap to find keys faster
+        this.actionValueFunction = new HashMap<>(); // TODO maybe treemap to find keys faster
         initialize();
     }
 
@@ -104,7 +104,7 @@ public class MyQLearning {
                     actionValueMap.put(action, 0d); // init all actions for every state with zero
                 }
 
-                q_sa.put(new State(width, height), actionValueMap); // init all states
+                actionValueFunction.put(new State(width, height), actionValueMap); // init all states
             }
         }
         start = new State(0, 0); // bottom left corner.
@@ -132,7 +132,7 @@ public class MyQLearning {
 
         nextState = ActionHandler.performAction(currState, action);
 
-        double currQ = Q(currState, action);
+        double currQ = getActionValue(currState, action);
         LOG.debug(String.format("Current Q(%s,%s) => %f", currState, action, currQ));
 
         //If not a valid transition stay in same state and add penalty
@@ -148,7 +148,7 @@ public class MyQLearning {
         currQ += learning * (reward + discounting * nextQ - currQ);
 
         LOG.debug(String.format("Update Q(%s,%s) <= %f", currState, action, currQ));
-        Q(currState, action, currQ); // update Q(s,a)
+        updateActionValue(currState, action, currQ); // update Q(s,a)
 
 
         infoForGUI.policy[currState.x][currState.y] = bestQ(currState).getKey().getValue(); // update for gui
@@ -159,12 +159,15 @@ public class MyQLearning {
      * Reset after goal has reached.
      */
     private void prepareNewEpisode() {
-        LOG.debug(">>> prepare new episode");
-        currState = start;
+        LOG.info(">>> prepare for episode: " + (episodes + 1));
         episodes++;
-        discounting = Math.pow(discounting, episodes);
-        LOG.debug("new discounting is: " + discounting);
-        LOG.debug("<<<");
+        currState = start;
+        int everyXEpi = 5;
+        if (episodes % everyXEpi == 0) {
+            discounting = Math.pow(discounting, episodes / everyXEpi);
+            LOG.info("new discounting is: " + discounting);
+        }
+        LOG.info("<<<");
     }
 
     /**
@@ -181,12 +184,11 @@ public class MyQLearning {
                                     @NotNull final State nextState) {
         if (environment.isValidTransition(currState, nextState)) {
             infoForGUI.receivedPenalty = false;
-            return costPerStep; //transition cost = pathCost
         } else {
             infoForGUI.receivedPenalty = true;
             this.nextState = currState;
-            return environment.getReward(currState, nextState) + costPerStep; //add reward or penalty
         }
+        return environment.getReward(currState, nextState) + costPerStep; //add reward or penalty
     }
 
     /**
@@ -196,9 +198,9 @@ public class MyQLearning {
      * @param chosenAction Not null.
      * @return TODO return
      */
-    private Double Q(@NotNull final State currState,
-                     @NotNull final Action chosenAction) {
-        final Double qValue = q_sa.get(currState).get(chosenAction);
+    private Double getActionValue(@NotNull final State currState,
+                                  @NotNull final Action chosenAction) {
+        final Double qValue = actionValueFunction.get(currState).get(chosenAction);
         checkArgument(qValue != null);
         return qValue;
     }
@@ -210,10 +212,10 @@ public class MyQLearning {
      * @param chosenAction Not null.
      * @param qValue       Not null.
      */
-    private void Q(@NotNull final State currState,
-                   @NotNull final Action chosenAction,
-                   @NotNull final Double qValue) {
-        q_sa.get(currState).replace(chosenAction, qValue);
+    private void updateActionValue(@NotNull final State currState,
+                                   @NotNull final Action chosenAction,
+                                   @NotNull final Double qValue) {
+        actionValueFunction.get(currState).replace(chosenAction, qValue);
     }
 
     /**
@@ -262,7 +264,7 @@ public class MyQLearning {
      * @return TODO return really Nullable?
      */
     private Map.Entry<Action, Double> bestQ(@NotNull final State currState) { // TODO test this
-        final Map<Action, Double> actionValueMap = q_sa.get(currState);
+        final Map<Action, Double> actionValueMap = actionValueFunction.get(currState);
         final Set<Map.Entry<Action, Double>> entrySet = actionValueMap.entrySet();
         return entrySet
                 .stream()
@@ -287,7 +289,7 @@ public class MyQLearning {
 
     @NotNull
     public Map<State, Map<Action, Double>> getQsa() {
-        return q_sa;
+        return actionValueFunction;
     }
 
     /**
@@ -300,7 +302,7 @@ public class MyQLearning {
                             @NotNull final String value) {
         switch (property) {
             case Penalty:
-                costPerStep = Integer.parseInt(value);
+                costPerStep = Double.parseDouble(value);
                 break;
             case LearningRate:
                 learning = Double.parseDouble(value);
