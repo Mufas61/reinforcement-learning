@@ -145,7 +145,8 @@ public class MyQLearning {
         LOG.debug("currQ += learning * (r + (discounting * nextQ) - currQ)");
         LOG.debug(String.format("%f += %f * (%f + (%f * %f) - %f)", currQ, learning, reward, discounting, nextQ, currQ));
         // Q(s,a) <- Q(s,a) + a [r + y * max_a'(Q(s',a')) - Q(s,a)]
-        currQ += learning * (reward + discounting * nextQ - currQ);
+        currQ = (1 - learning) * currQ + learning * (reward + discounting * nextQ - currQ); // TODO test this
+        // currQ += learning * (reward + discounting * nextQ - currQ);
 
         LOG.debug(String.format("Update Q(%s,%s) <= %f", currState, action, currQ));
         updateActionValue(currState, action, currQ); // update Q(s,a)
