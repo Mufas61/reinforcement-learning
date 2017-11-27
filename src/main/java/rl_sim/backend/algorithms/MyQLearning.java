@@ -143,12 +143,11 @@ public class MyQLearning {
         LOG.debug(String.format("min_a(Q(%s,a)) => %f", nextState, nextQ));
 
         LOG.debug("currQ += learning * (r + (discounting * nextQ) - currQ)");
-        LOG.debug(String.format("%f += %f * (%f + (%f * %f) - %f)", currQ, learning, reward, discounting, nextQ, currQ));
         // Q(s,a) <- Q(s,a) + a [r + y * max_a'(Q(s',a')) - Q(s,a)]
-        currQ = (1 - learning) * currQ + learning * (reward + discounting * nextQ - currQ); // TODO test this
-        // currQ += learning * (reward + discounting * nextQ - currQ);
-
-        LOG.debug(String.format("Update Q(%s,%s) <= %f", currState, action, currQ));
+//        currQ = (1 - learning) * currQ + learning * (reward + discounting * nextQ); // TODO test this
+        double newQ = currQ + learning * (reward + discounting * nextQ - currQ);
+        LOG.debug(String.format("%f = %f + %f * (%f + (%f * %f) - %f)", newQ, currQ, learning, reward, discounting, nextQ, currQ));
+        currQ = newQ;
         updateActionValue(currState, action, currQ); // update Q(s,a)
 
 
