@@ -150,7 +150,6 @@ public class MyQLearning {
         currQ = newQ;
         updateActionValue(currState, action, currQ); // update Q(s,a)
 
-
         infoForGUI.policy[currState.x][currState.y] = bestQ(currState).getKey().getValue(); // update for gui
         currState = environment.isValidTransition(currState, nextState) ? nextState : currState;
     }
@@ -159,15 +158,9 @@ public class MyQLearning {
      * Reset after goal has reached.
      */
     private void prepareNewEpisode() {
-        LOG.info(">>> prepare for episode: " + (episodes + 1));
+        LOG.info(">>> prepare for episode: " + (episodes + 1) + " <<<");
         episodes++;
         currState = start;
-        int everyXEpi = 5;
-        if (episodes % everyXEpi == 0) {
-            discounting = Math.pow(discounting, episodes / everyXEpi);
-            LOG.info("new discounting is: " + discounting);
-        }
-        LOG.info("<<<");
     }
 
     /**
