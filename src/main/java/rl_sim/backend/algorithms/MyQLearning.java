@@ -18,13 +18,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class MyQLearning {
     private static final Logger LOG = Logger.getLogger(MyQLearning.class);
 
-    private boolean isInitialized = false;
+    boolean isInitialized = false;
 
     /**
      * Holds all information for the gui that wouldn't been necessary for the algorithm.
      */
     @NotNull
-    private InfoForGUI infoForGUI;
+    InfoForGUI infoForGUI;
 
     /**
      * Penalty per step.
@@ -34,12 +34,12 @@ public class MyQLearning {
     /**
      * Percentage of how much of the new learned should be calculated to the overall result.
      */
-    private double learning = 0.7;
+    double learning = 0.7;
 
     /**
      * Discounting rate. Every new episode will be attenuated.
      */
-    private double discounting;
+    double discounting;
 
     /**
      * Percentage of exploration. Given chance that a random {@link Action} will be chosen and not the best.
@@ -50,7 +50,7 @@ public class MyQLearning {
      * Environment.
      */
     @NotNull
-    private final Maze environment;
+    final Maze environment;
 
     /**
      * First state in every new round. Bottom left corner.
@@ -60,12 +60,12 @@ public class MyQLearning {
     /**
      * Holds current state.
      */
-    private State currState;
+    State currState;
 
     /**
      * Holds next planed state.
      */
-    private State nextState;
+    State nextState;
 
     /**
      * Amount of done episodes (start -> goal).
@@ -157,7 +157,7 @@ public class MyQLearning {
     /**
      * Reset after goal has reached.
      */
-    private void prepareNewEpisode() {
+    void prepareNewEpisode() {
         LOG.info(">>> prepare for episode: " + (episodes + 1) + " <<<");
         episodes++;
         currState = start;
@@ -173,8 +173,8 @@ public class MyQLearning {
      * @param nextState Not null.
      * @return amount of reward/penalty for this transition.
      */
-    private double handleTransition(@NotNull final State currState,
-                                    @NotNull final State nextState) {
+    double handleTransition(@NotNull final State currState,
+                            @NotNull final State nextState) {
         if (environment.isValidTransition(currState, nextState)) {
             infoForGUI.receivedPenalty = false;
         } else {
@@ -191,8 +191,8 @@ public class MyQLearning {
      * @param chosenAction Not null.
      * @return TODO return
      */
-    private Double getActionValue(@NotNull final State currState,
-                                  @NotNull final Action chosenAction) {
+    Double getActionValue(@NotNull final State currState,
+                          @NotNull final Action chosenAction) {
         final Double qValue = actionValueFunction.get(currState).get(chosenAction);
         checkArgument(qValue != null);
         return qValue;
@@ -205,9 +205,9 @@ public class MyQLearning {
      * @param chosenAction Not null.
      * @param qValue       Not null.
      */
-    private void updateActionValue(@NotNull final State currState,
-                                   @NotNull final Action chosenAction,
-                                   @NotNull final Double qValue) {
+    void updateActionValue(@NotNull final State currState,
+                           @NotNull final Action chosenAction,
+                           @NotNull final Double qValue) {
         actionValueFunction.get(currState).replace(chosenAction, qValue);
     }
 
@@ -217,7 +217,7 @@ public class MyQLearning {
      * @param currState Not null.
      * @return TODO return
      */
-    private Action chosePolicy(@NotNull final State currState) { // TODO test this
+    Action chosePolicy(@NotNull final State currState) { // TODO test this
         LOG.debug(">>> Chose policy");
         final Action bestAction = bestQ(currState).getKey();
         Action chosenAction = bestAction;
@@ -256,7 +256,7 @@ public class MyQLearning {
      * @param currState Not null.
      * @return TODO return really Nullable?
      */
-    private Map.Entry<Action, Double> bestQ(@NotNull final State currState) { // TODO test this
+    Map.Entry<Action, Double> bestQ(@NotNull final State currState) { // TODO test this
         final Map<Action, Double> actionValueMap = actionValueFunction.get(currState);
         final Set<Map.Entry<Action, Double>> entrySet = actionValueMap.entrySet();
         return entrySet

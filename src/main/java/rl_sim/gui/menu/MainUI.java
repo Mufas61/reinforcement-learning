@@ -1,7 +1,7 @@
 package rl_sim.gui.menu;
 
 import rl_sim.gui.algorithms.MyQLSim;
-import rl_sim.gui.algorithms.OLDQLSimulator;
+import rl_sim.gui.algorithms.SARSASimulator;
 import rl_sim.gui.maze.MazeEditor;
 
 import javax.swing.*;
@@ -90,9 +90,9 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
     private void initQLSimButton(JPanel jPanel) {
         JButton jQLSimButton = new JButton();
         jPanel.add(jQLSimButton);
-        jQLSimButton.setText("Q Learning");
+        jQLSimButton.setText("SARSA");
         jQLSimButton.setBounds(180, 134, 160, 30);
-        jQLSimButton.setActionCommand(GUICommand.Q_LEARNING_SIM.getValue());
+        jQLSimButton.setActionCommand(GUICommand.SARSA.getValue());
         jQLSimButton.addActionListener(this);
     }
 
@@ -111,8 +111,8 @@ public class MainUI extends javax.swing.JFrame implements ActionListener {
         } else if (evt.getActionCommand().equals(GUICommand.EDIT_MAZE.getValue())) {
             MazeEditor inst = new MazeEditor();
             inst.setVisible(true);
-        } else if (evt.getActionCommand().equals(GUICommand.Q_LEARNING_SIM.getValue())) {
-            OLDQLSimulator inst = new OLDQLSimulator();
+        } else if (evt.getActionCommand().equals(GUICommand.SARSA.getValue())) {
+            SARSASimulator inst = new SARSASimulator();
             inst.setVisible(true);
         } else if (evt.getActionCommand().equals(GUICommand.MY_Q_LEARNING_SIM.getValue())) {
             MyQLSim inst = new MyQLSim();

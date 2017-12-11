@@ -40,7 +40,9 @@ public enum GUICommand {
     /**
      * Open value iteration.
      */
-    VALUE_ITERATION("Value");
+    VALUE_ITERATION("Value"),
+
+    SARSA("SARSA");
 
     /**
      * Holds command as string.
