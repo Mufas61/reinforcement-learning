@@ -80,6 +80,11 @@ public class MyQLearning {
     private final Map<State, Map<Action, Double>> actionValueFunction;
 
     /**
+     * Rate of non-determinism of the environment.
+     */
+    double pjog;
+
+    /**
      * Constructor.
      *
      * @param environment Not null.
@@ -130,7 +135,7 @@ public class MyQLearning {
         // choose an action a TODO e-greedy-stuff
         final Action action = chosePolicy(currState);
 
-        nextState = ActionHandler.performAction(currState, action);
+        nextState = ActionHandler.performAction(currState, action, pjog);
 
         double currQ = getActionValue(currState, action);
         LOG.debug(String.format("Current Q(%s,%s) => %f", currState, action, currQ));
@@ -293,6 +298,7 @@ public class MyQLearning {
      */
     public void setProperty(@NotNull final Property property,
                             @NotNull final String value) {
+        LOG.info(property.name() + " is now " + value);
         switch (property) {
             case Penalty:
                 costPerStep = Double.parseDouble(value);
@@ -306,6 +312,9 @@ public class MyQLearning {
             case DiscountingRate:
                 discounting = Double.parseDouble(value);
                 break;
+            case PJOG:
+                pjog = Double.parseDouble(value);
+                break;
             default:
                 throw new IllegalArgumentException(property.name() + "not implemented!s");
 
@@ -316,7 +325,7 @@ public class MyQLearning {
      * Possible accessible field.
      */
     public enum Property {
-        Penalty, LearningRate, ExplorationRate, DiscountingRate
+        Penalty, LearningRate, ExplorationRate, DiscountingRate, PJOG
     }
 
     /**

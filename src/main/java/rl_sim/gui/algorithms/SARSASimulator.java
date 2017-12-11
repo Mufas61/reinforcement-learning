@@ -327,13 +327,14 @@ public class SARSASimulator extends javax.swing.JFrame implements ActionListener
 
             //double pjog = Double.parseDouble(pjogTextField.getText());
             sarsa = new SARSA(myMaze);
+            sarsa.setProperty(SARSA.Property.PJOG, pjogTextField.getText());
             sarsa.setProperty(SARSA.Property.LearningRate, jLearnRateTextField.getText());
             sarsa.setProperty(SARSA.Property.ExplorationRate, jEpsilonTextField.getText());
 
             algorithmStatus = "SARSA ";
             repaint();
         } else if (evt.getActionCommand().equals("Update") && sarsa != null) {
-            //ql.setProperty(MyQLearning.Property.PJOG, pjogTextField.getText());
+            sarsa.setProperty(SARSA.Property.PJOG, pjogTextField.getText());
             sarsa.setProperty(SARSA.Property.ExplorationRate, jEpsilonTextField.getText());
             sarsa.setProperty(SARSA.Property.LearningRate, jLearnRateTextField.getText());
         } else if (evt.getActionCommand().equals("Step")) {

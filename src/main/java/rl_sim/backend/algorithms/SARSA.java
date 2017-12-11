@@ -35,7 +35,7 @@ public class SARSA extends MyQLearning {
         // choose an action
         final Action currAction = (nextAction == null ? chosePolicy(currState) : nextAction);
 
-        nextState = ActionHandler.performAction(currState, currAction);
+        nextState = ActionHandler.performAction(currState, currAction, pjog);
 
         double currQ = getActionValue(currState, currAction);
         LOG.debug(String.format("Current Q(%s,%s) => %f", currState, currAction, currQ));

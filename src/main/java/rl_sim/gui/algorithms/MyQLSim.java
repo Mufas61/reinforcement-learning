@@ -327,13 +327,14 @@ public class MyQLSim extends javax.swing.JFrame implements ActionListener {
 
             //double pjog = Double.parseDouble(pjogTextField.getText());
             qLearning = new MyQLearning(myMaze);
+            qLearning.setProperty(MyQLearning.Property.PJOG, pjogTextField.getText());
             qLearning.setProperty(MyQLearning.Property.LearningRate, jLearnRateTextField.getText());
             qLearning.setProperty(MyQLearning.Property.ExplorationRate, jEpsilonTextField.getText());
 
             algorithmStatus = "My Q Learning ";
             repaint();
         } else if (evt.getActionCommand().equals("Update") && qLearning != null) {
-            //ql.setProperty(MyQLearning.Property.PJOG, pjogTextField.getText());
+            qLearning.setProperty(MyQLearning.Property.PJOG, pjogTextField.getText());
             qLearning.setProperty(MyQLearning.Property.ExplorationRate, jEpsilonTextField.getText());
             qLearning.setProperty(MyQLearning.Property.LearningRate, jLearnRateTextField.getText());
         } else if (evt.getActionCommand().equals("Step")) {

@@ -31,24 +31,22 @@ public class ActionHandler {
     public static State performAction(State st, Action action, double pjog) {
         //Random randomGen = new Random();
         double rand = Math.random();
-        State newSt;
         double randActProb = pjog / (Action.capabilities());
-        int choosenAction = action.getValue();
+        int chosenAction = action.getValue();
 
         for (int i = 0; i < Action.capabilities(); i++) {
             if (rand < (i + 1) * randActProb) {
-                choosenAction = i;
+                chosenAction = i;
                 break;
             }
         }
         Utility.show("==================");
         Utility.show("Action to be Taken:" + action);
         Utility.show("Rand" + rand);
-        Utility.show("Action Taken:" + choosenAction);
+        Utility.show("Action Taken:" + chosenAction);
         Utility.show("==================");
 
-        newSt = performAction(st, Action.valueOf(choosenAction));
-        return newSt;
+        return performAction(st, Action.valueOf(chosenAction));
     }
 
 
