@@ -4,6 +4,12 @@ This program shows how an Q-learning algorithm works in a maze and has a maze-ed
 
 Developed with the help of an already existing program: http://www.cs.cmu.edu/~awm/rlsim/
 
+## How to start the application
+
+The application comes with a gradle wrapper, which loads all dependencies and runs the application with the command:
+> sh gradlew run
+
+
 ## Q-Learning 
 
 **Q(s,a) = Q(s,a) + &alpha; [r + &gamma; * Q(s',a') - Q(s,a)]**
