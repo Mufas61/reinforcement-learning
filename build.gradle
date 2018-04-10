@@ -8,6 +8,8 @@ apply plugin: 'application'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+mainClassName = 'rl_sim.Application'
+
 repositories {
     mavenCentral()
     jcenter()
